@@ -1,12 +1,17 @@
 package com.devapps.aquatraking
 
+import android.icu.text.Transliterator.Position
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.viewpager2.widget.ViewPager2
+import com.devapps.aquatraking.adapters.ViewPagerAdapter
 import com.devapps.aquatraking.databinding.ActivityMainBinding
 import com.devapps.aquatraking.fragments.ChartsFragment
 import com.devapps.aquatraking.fragments.HomeFragment
 import com.devapps.aquatraking.fragments.SettingsFragment
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 
 class MainActivity : AppCompatActivity() {
 
@@ -14,29 +19,36 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //Binding
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val firstFragment = HomeFragment()
-        val secondFragment = ChartsFragment()
-        val thirdFragment = SettingsFragment()
+        //ViewPagerAdapter
+        val adapter = ViewPagerAdapter(this)
+        adapter.addFragment(HomeFragment(), "Home")
+        adapter.addFragment(ChartsFragment(), "Consumo")
+        adapter.addFragment(SettingsFragment(), "Configuración")
 
-        setCurrentFragment(firstFragment)
+        //Signing adapter to ViewPager
+        binding.viewPager.adapter = adapter
 
-        binding.bottomNavigationView.setOnItemSelectedListener { item->
-            when(item.itemId){
-                R.id.home -> setCurrentFragment(firstFragment)
-                R.id.charts -> setCurrentFragment(secondFragment)
-                R.id.settings -> setCurrentFragment(thirdFragment)
+        //BottomNavigationView
+        binding.bottomNavigationView.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.home -> binding.viewPager.currentItem = 0
+                R.id.charts -> binding.viewPager.currentItem = 1
+                R.id.settings -> binding.viewPager.currentItem = 2
             }
             true
         }
+        
+        //Sync ViewPager with BottomNavigationView
+        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                binding.bottomNavigationView.menu.getItem(position).isChecked = true
+            }
+        })
     }
-
-    private fun setCurrentFragment(fragment: Fragment) =
-        supportFragmentManager.beginTransaction().apply {
-            replace(R.id.fragmentContainer, fragment)
-            commit()
-        }
-
 }
