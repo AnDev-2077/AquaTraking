@@ -1,17 +1,13 @@
 package com.devapps.aquatraking
 
-import android.icu.text.Transliterator.Position
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.devapps.aquatraking.adapters.ViewPagerAdapter
 import com.devapps.aquatraking.databinding.ActivityMainBinding
 import com.devapps.aquatraking.fragments.ChartsFragment
 import com.devapps.aquatraking.fragments.HomeFragment
 import com.devapps.aquatraking.fragments.SettingsFragment
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
 
 class MainActivity : AppCompatActivity() {
 
