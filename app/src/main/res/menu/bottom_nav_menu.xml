@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/home"
+        android:icon="@drawable/ic_settings"
+        android:title="Inicio" />
+    <item
+        android:id="@+id/charts"
+        android:icon="@drawable/ic_bar_chart"
+        android:title="Consumo" />
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/ic_settings"
+        android:title="Configuración" />
+
+</menu>
