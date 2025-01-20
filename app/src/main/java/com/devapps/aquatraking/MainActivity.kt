@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
 
         //ViewPagerAdapter
         val adapter = ViewPagerAdapter(this)
-        adapter.addFragment(HomeFragment(), "Home")
+        adapter.addFragment(HomeFragment(), "Inicio")
         adapter.addFragment(ChartsFragment(), "Consumo")
         adapter.addFragment(SettingsFragment(), "Configuración")
 
@@ -32,9 +32,9 @@ class MainActivity : AppCompatActivity() {
         //BottomNavigationView
         binding.bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.home -> binding.viewPager.currentItem = 0
-                R.id.charts -> binding.viewPager.currentItem = 1
-                R.id.settings -> binding.viewPager.currentItem = 2
+                R.id.home -> binding.viewPager.setCurrentItem(0, false)
+                R.id.charts -> binding.viewPager.setCurrentItem(1, false)
+                R.id.settings -> binding.viewPager.setCurrentItem(2, false)
             }
             true
         }

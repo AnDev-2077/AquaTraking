@@ -20,7 +20,6 @@ class ViewPagerAdapter (fragmentActivity: FragmentActivity) : FragmentStateAdapt
     fun addFragment(fragment: Fragment, title: String){
         fragments.add(fragment)
         fragmentTitles.add(title)
-
     }
 
     fun getPageTitle(position: Int): CharSequence {
