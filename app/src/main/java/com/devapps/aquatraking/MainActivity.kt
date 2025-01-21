@@ -12,6 +12,7 @@ import com.devapps.aquatraking.fragments.SettingsFragment
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var adapter: ViewPagerAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,8 +21,11 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        //Set the toolbar as the action bar
+        setSupportActionBar(binding.toolbar)
+
         //ViewPagerAdapter
-        val adapter = ViewPagerAdapter(this)
+        adapter = ViewPagerAdapter(this)
         adapter.addFragment(HomeFragment(), "Inicio")
         adapter.addFragment(ChartsFragment(), "Consumo")
         adapter.addFragment(SettingsFragment(), "Configuración")
@@ -43,8 +47,14 @@ class MainActivity : AppCompatActivity() {
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
+                //Update AppBar title
+                supportActionBar?.title = adapter.getPageTitle(position)
+                //Update BottomNavigationView selection
                 binding.bottomNavigationView.menu.getItem(position).isChecked = true
             }
         })
+
+        //Set initial title
+        supportActionBar?.title = adapter.getPageTitle(0)
     }
 }
