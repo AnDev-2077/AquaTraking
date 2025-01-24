@@ -1,19 +1,20 @@
-package com.devapps.aquatraking
+package com.devapps.aquatraking.views
 
 import android.content.Context
 import android.view.LayoutInflater
-import com.devapps.aquatraking.databinding.MarkerViewBinding
+import com.devapps.aquatraking.R
+import com.devapps.aquatraking.databinding.ItemMarkerViewBinding
 import com.github.mikephil.charting.components.MarkerView
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.utils.MPPointF
 
-class CustomMarkerView (context: Context) : MarkerView(context, R.layout.marker_view){
-    private val binding: MarkerViewBinding
+class CustomMarkerView (context: Context) : MarkerView(context, R.layout.item_marker_view){
+    private val binding: ItemMarkerViewBinding
 
     init {
         val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        binding = MarkerViewBinding.inflate(inflater, this, true)
+        binding = ItemMarkerViewBinding.inflate(inflater, this, true)
     }
 
     private val daysOfWeek = listOf("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")

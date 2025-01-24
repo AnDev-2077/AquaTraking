@@ -2,4 +2,7 @@
     <string name="app_name">AquaTracking</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="ic_tank_pathData">M0.2,210.77L20.23,237.14C20.4,237.37 20.66,237.51 20.95,237.54L102.86,244H123.14L205.53,237.54C205.83,237.51 206.1,237.36 206.27,237.11L225.82,209.26C225.94,209.09 226,208.89 226,208.68V5.8C226,4.94 224.88,4.34 224.1,4.71C219.54,6.91 205.9,10.89 173.85,3.57C132.32,-5.91 97.55,10.26 52.15,3.57C12.08,-2.34 2.12,2.18 0.33,3.33C0.11,3.47 0,3.72 0,3.99V210.16C0,210.38 0.07,210.59 0.2,210.77Z
+
+</string>
 </resources>

@@ -47,8 +47,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation (libs.material.v140)
-    implementation (libs.mpandroidchart)
+    implementation(libs.material.v140)
+    implementation(libs.mpandroidchart)
 
     implementation(libs.androidx.runtime.android)
     testImplementation(libs.junit)

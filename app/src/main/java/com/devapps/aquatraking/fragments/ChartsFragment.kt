@@ -1,6 +1,5 @@
 package com.devapps.aquatraking.fragments
 
-import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -8,7 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
-import com.devapps.aquatraking.CustomMarkerView
+import com.devapps.aquatraking.views.CustomMarkerView
 import com.devapps.aquatraking.R
 import com.devapps.aquatraking.databinding.FragmentChartsBinding
 import com.github.mikephil.charting.components.XAxis
