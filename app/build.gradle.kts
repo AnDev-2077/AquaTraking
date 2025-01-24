@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
 }
 
+
 android {
     namespace = "com.devapps.aquatraking"
     compileSdk = 35
@@ -37,17 +38,19 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation (libs.material.v140)
+    implementation (libs.mpandroidchart)
 
+    implementation(libs.androidx.runtime.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

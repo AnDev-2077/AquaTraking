@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+
     tools:context=".fragments.SettingsFragment">
 
     <!-- CardView con perfil de usuario -->
@@ -31,7 +32,7 @@
                 android:scaleType="centerCrop"
                 android:clipToOutline="true"
                 android:background="@drawable/circle_shape"
-                android:src="@drawable/zazu" />
+                android:src="@drawable/zazu"/>
 
             <TextView
                 android:id="@+id/tvUserName"
@@ -126,7 +127,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Estadísticas" />
+                    android:text="Almacenamineto de datos" />
             </LinearLayout>
 
             <LinearLayout

@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.devapps.aquatraking.R
 
-
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
@@ -21,6 +20,7 @@ class HomeFragment : Fragment() {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
+
     }
 
     override fun onCreateView(
@@ -28,6 +28,7 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_home, container, false)
+
     }
 
     companion object {
