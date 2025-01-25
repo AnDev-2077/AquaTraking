@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1012499133355",
+    "project_id": "aquatracking-5bade",
+    "storage_bucket": "aquatracking-5bade.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1012499133355:android:49a10b389e8bb3b260d8ee",
+        "android_client_info": {
+          "package_name": "com.devapps.aquatraking"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1012499133355-dovbphtq217709q3el3kfi7u996j0lfi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.devapps.aquatraking",
+            "certificate_hash": "4ca468c1fea3e2a6f334847f50a39e3450a62b68"
+          }
+        },
+        {
+          "client_id": "1012499133355-rmuu6ivckevedhi919ob2ttavq79m322.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLxudNF_YsIF-sgwUULhvb-O65dpnjX3M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1012499133355-rmuu6ivckevedhi919ob2ttavq79m322.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

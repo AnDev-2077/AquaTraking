@@ -9,6 +9,10 @@ import com.devapps.aquatraking.fragments.ChartsFragment
 import com.devapps.aquatraking.fragments.HomeFragment
 import com.devapps.aquatraking.fragments.SettingsFragment
 
+enum class ProviderType{
+    GOOGLE
+}
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -55,5 +59,7 @@ class MainActivity : AppCompatActivity() {
 
         //Set initial title
         supportActionBar?.title = adapter.getPageTitle(0)
+
+
     }
 }
