@@ -1,13 +1,19 @@
 package com.devapps.aquatraking.fragments
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.SeekBar
 import com.devapps.aquatraking.databinding.FragmentHomeBinding
 import com.devapps.aquatraking.views.WaveLoadView
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -16,8 +22,9 @@ class HomeFragment : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
 
-    private var _binding: FragmentHomeBinding? = null
+    private var binding: FragmentHomeBinding? = null
     private var waveView: WaveLoadView? = null
+    private lateinit var database: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,20 +38,59 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        return _binding!!.root
+        binding = FragmentHomeBinding.inflate(inflater, container, false)
+        return binding!!.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViews()
+        Log.d("HomeFragment", "onViewCreated called")
+        initFirebaseListener()
     }
 
     private fun initViews() {
-        waveView = _binding?.waveView
-        waveView!!.setProgress(50f)
+        waveView = binding?.waveView
     }
 
+    private fun initFirebaseListener() {
+        Log.d("HomeFragment", "initFirebaseListener called")
+        database = FirebaseDatabase.getInstance().getReference("/ModulesWifi/-O9AOGhgVPLt464eEULY")
+
+        database.addChildEventListener(object : ChildEventListener {
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                val porcentaje = snapshot.child("porcentaje").getValue(String::class.java)?.toFloatOrNull()
+                if (porcentaje != null) {
+                    initViews()
+                    waveView?.setProgress(porcentaje)
+                    Log.d("HomeFragment", "Porcentaje actualizado: $porcentaje%")
+                } else {
+                    Log.e("HomeFragment", "El porcentaje es nulo o no válido")
+                }
+            }
+
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                val porcentaje = snapshot.child("porcentaje").getValue(String::class.java)?.toFloatOrNull()
+                if (porcentaje != null) {
+                    initViews()
+                    waveView?.setProgress(porcentaje)
+                    Log.d("HomeFragment", "Porcentaje actualizado: $porcentaje%")
+                } else {
+                    Log.e("HomeFragment", "El porcentaje es nulo o no válido")
+                }
+            }
+
+            override fun onChildRemoved(snapshot: DataSnapshot) {}
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("HomeFragment", "Error al leer datos: ${error.message}")
+            }
+        })
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding = null
+    }
 
     companion object {
         @JvmStatic
