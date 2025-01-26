@@ -15,6 +15,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
 
 class AuthActivity : AppCompatActivity() {
 
@@ -27,8 +28,8 @@ class AuthActivity : AppCompatActivity() {
         binding = ActivityAuthBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setUp()
-
     }
+
     private fun setUp() {
         title = "Autenticación"
         binding.btGoogle.setOnClickListener {
@@ -41,7 +42,6 @@ class AuthActivity : AppCompatActivity() {
             googleClient.signOut()
             startActivityForResult(googleClient.signInIntent, GOOGLE_SIGN_IN)
         }
-
     }
 
     private fun showAlert() {
@@ -65,6 +65,39 @@ class AuthActivity : AppCompatActivity() {
         prefs.putString("provider", provider.name)
         prefs.apply()
     }
+
+    private fun saveUserToFirestore(email: String, uid: String, profileImageUrl: String?) {
+        val db = FirebaseFirestore.getInstance()
+        val userRef = db.collection("users").document(uid)
+
+        Log.d("AuthActivity", "Guardando usuario con UID: $uid")
+        Log.d("AuthActivity", "Imagen de perfil: $profileImageUrl")
+
+        userRef.get().addOnSuccessListener { document ->
+            if (!document.exists()) {
+                val userData = mapOf(
+                    "email" to email,
+                    "name" to "Nombre por defecto",
+                    "profileImageUrl" to (profileImageUrl ?: "")
+                )
+
+                Log.d("AuthActivity", "Guardando datos: $userData")
+
+                userRef.set(userData)
+                    .addOnSuccessListener {
+                        Log.d("AuthActivity", "Usuario guardado en Firestore.")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("AuthActivity", "Error al guardar usuario: ${e.message}")
+                    }
+            } else {
+                Log.d("AuthActivity", "Usuario ya existe en Firestore.")
+            }
+        }.addOnFailureListener { e ->
+            Log.e("AuthActivity", "Error al verificar usuario: ${e.message}")
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == GOOGLE_SIGN_IN) {
@@ -75,7 +108,12 @@ class AuthActivity : AppCompatActivity() {
                     val credential = GoogleAuthProvider.getCredential(account.idToken, null)
                     FirebaseAuth.getInstance().signInWithCredential(credential).addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            showHome(account.email ?: "", ProviderType.GOOGLE)
+                            val email = account.email ?: ""
+                            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                            val profileImageUrl = account.photoUrl?.toString()
+                            saveUserToFirestore(email, uid, profileImageUrl)
+
+                            showHome(email, ProviderType.GOOGLE)
                         } else {
                             showAlert()
                         }

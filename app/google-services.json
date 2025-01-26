@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "1012499133355",
+    "firebase_url": "https://aquatracking-5bade-default-rtdb.firebaseio.com",
     "project_id": "aquatracking-5bade",
     "storage_bucket": "aquatracking-5bade.firebasestorage.app"
   },

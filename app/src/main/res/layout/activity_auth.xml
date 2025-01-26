@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".activities.AuthActivity">
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btGoogle"
             android:layout_width="0dp"
@@ -26,7 +27,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.3"
+            app:layout_constraintVertical_bias="0.93"
             app:strokeColor="#222226"
             app:strokeWidth="1dp" />
 

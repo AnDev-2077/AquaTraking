@@ -6,7 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
-import com.devapps.aquatraking.R
+import com.devapps.aquatraking.databinding.FragmentHomeBinding
+import com.devapps.aquatraking.views.WaveLoadView
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -15,7 +16,8 @@ class HomeFragment : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
 
-
+    private var _binding: FragmentHomeBinding? = null
+    private var waveView: WaveLoadView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,36 +25,26 @@ class HomeFragment : Fragment() {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
-
-
-
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_home, container, false)
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        return _binding!!.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initViews()
     }
 
-    /*private fun initWaves() {
-        waterWaveView = view?.findViewById(R.id.waterWaveView)
-        seekBar = view?.findViewById(R.id.seekBar)
-        seekBar!!.setOnSeekBarChangeListener(object :SeekBar.OnSeekBarChangeListener{
-            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-                waterWaveView!!.setProgress(p1.toFloat())
-            }
+    private fun initViews() {
+        waveView = _binding?.waveView
+        waveView!!.setProgress(50f)
+    }
 
-            override fun onStartTrackingTouch(p0: SeekBar?) {}
-
-            override fun onStopTrackingTouch(p0: SeekBar?) {}
-
-        })
-    }*/
 
     companion object {
         @JvmStatic

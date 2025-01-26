@@ -1,5 +1,6 @@
 package com.devapps.aquatraking.fragments
 
+import com.devapps.aquatraking.activities.TeamsActivity
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -48,6 +49,11 @@ class SettingsFragment : Fragment() {
         }
         binding.btLogOut.setOnClickListener {
             logoutConfirmationDialog()
+        }
+
+        binding.llOption3.setOnClickListener{
+            val intent = Intent(activity, TeamsActivity::class.java)
+            startActivity(intent)
         }
     }
 

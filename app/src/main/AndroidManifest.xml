@@ -15,6 +15,9 @@
         android:theme="@style/Theme.AquaTraking"
         tools:targetApi="31">
         <activity
+            android:name=".activities.TeamsActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.AuthActivity"
             android:exported="false" />
         <activity
