@@ -1,5 +1,6 @@
 package com.devapps.aquatraking.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -7,13 +8,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.devapps.aquatraking.databinding.FragmentHomeBinding
+import com.devapps.aquatraking.services.ForegroundService
 import com.devapps.aquatraking.views.WaveLoadView
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -45,6 +46,10 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d("HomeFragment", "onViewCreated called")
+
+        val serviceIntent = Intent(requireContext(), ForegroundService::class.java)
+        requireContext().startService(serviceIntent)
+
         initFirebaseListener()
     }
 
@@ -74,6 +79,7 @@ class HomeFragment : Fragment() {
                     initViews()
                     waveView?.setProgress(porcentaje)
                     Log.d("HomeFragment", "Porcentaje actualizado: $porcentaje%")
+                    sendForegroundService(porcentaje)
                 } else {
                     Log.e("HomeFragment", "El porcentaje es nulo o no válido")
                 }
@@ -86,6 +92,13 @@ class HomeFragment : Fragment() {
             }
         })
     }
+
+    private fun sendForegroundService(porcentaje: Float){
+        val intent = Intent(requireContext(), ForegroundService::class.java)
+        intent.putExtra("porcentaje", porcentaje)
+        requireContext().startService(intent)
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
