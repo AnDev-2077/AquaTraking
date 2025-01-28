@@ -1,23 +1,20 @@
 package com.devapps.aquatraking.activities
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.devapps.aquatraking.R
 import com.devapps.aquatraking.databinding.ActivityGroupsMenuBinding
-import com.devapps.aquatraking.databinding.ActivityNotificationsMenuBinding
 import com.google.android.material.appbar.MaterialToolbar
 
-class NotificationsMenuActivity : AppCompatActivity() {
+class GroupsMenuActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityNotificationsMenuBinding
+    private lateinit var binding: ActivityGroupsMenuBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = ActivityNotificationsMenuBinding.inflate(layoutInflater)
+        binding = ActivityGroupsMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         val toolbar: MaterialToolbar = binding.toolbar
@@ -25,5 +22,9 @@ class NotificationsMenuActivity : AppCompatActivity() {
             onBackPressedDispatcher.onBackPressed()
         }
 
+        binding.llOption1.setOnClickListener{
+            val intent = Intent(this, TeamsActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

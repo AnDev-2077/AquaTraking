@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import com.devapps.aquatraking.databinding.FragmentHomeBinding
 import com.devapps.aquatraking.services.ForegroundService
 import com.devapps.aquatraking.views.WaveLoadView
@@ -58,8 +59,17 @@ class HomeFragment : Fragment() {
     }
 
     private fun initFirebaseListener() {
+
+        val sharedPreferences = requireContext().getSharedPreferences("UserPreferences", AppCompatActivity.MODE_PRIVATE)
+        val moduleKey = sharedPreferences.getString("moduleKey", null)
+
         Log.d("HomeFragment", "initFirebaseListener called")
-        database = FirebaseDatabase.getInstance().getReference("/ModulesWifi/-O9AOGhgVPLt464eEULY")
+        database = FirebaseDatabase.getInstance().getReference("/ModulesWifi/$moduleKey")
+
+        if (moduleKey == null) {
+            Log.e("HomeFragment", "No se encontró ninguna clave de módulo en SharedPreferences")
+            return
+        }
 
         database.addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {

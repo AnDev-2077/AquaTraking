@@ -3,11 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -19,11 +22,22 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AquaTraking"
         tools:targetApi="31">
+        <activity
+            android:name=".activities.AddModuleByCodeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.AddModuleByQRActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ModulesActivity"
+            android:exported="false" />
+
         <service
             android:name=".services.ForegroundService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="dataSync"/>
+            android:foregroundServiceType="dataSync" />
+
         <activity
             android:name=".activities.ThemesMenuActivity"
             android:exported="false" />
@@ -31,7 +45,7 @@
             android:name=".activities.NotificationsMenuActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.GroupesMenuActivity"
+            android:name=".activities.GroupsMenuActivity"
             android:exported="false" />
         <activity
             android:name=".activities.StorageMenuActivity"

@@ -14,7 +14,8 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="8dp">
+        android:layout_margin="8dp"
+        app:cardCornerRadius="8dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -85,7 +86,8 @@
         app:layout_constraintTop_toBottomOf="@id/cardUserProfile"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="8dp">
+        android:layout_margin="8dp"
+        app:cardCornerRadius="8dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -156,6 +158,31 @@
                 <ImageView
                     android:layout_width="32dp"
                     android:layout_height="32dp"
+                    android:src="@drawable/ic_module"
+                    app:tint="@color/gray2" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Modulos" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llOption4"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/llOption3"
+                app:layout_constraintStart_toStartOf="parent"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?android:attr/selectableItemBackground"
+                android:padding="8dp">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:src="@drawable/ic_group" />
 
                 <TextView
@@ -166,11 +193,11 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/llOption4"
+                android:id="@+id/llOption5"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:orientation="horizontal"
-                app:layout_constraintTop_toBottomOf="@id/llOption3"
+                app:layout_constraintTop_toBottomOf="@id/llOption4"
                 app:layout_constraintStart_toStartOf="parent"
                 android:clickable="true"
                 android:focusable="true"
@@ -190,11 +217,11 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/llOption5"
+                android:id="@+id/llOption6"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:orientation="horizontal"
-                app:layout_constraintTop_toBottomOf="@id/llOption4"
+                app:layout_constraintTop_toBottomOf="@id/llOption5"
                 app:layout_constraintStart_toStartOf="parent"
                 android:clickable="true"
                 android:focusable="true"

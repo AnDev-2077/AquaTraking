@@ -1,6 +1,5 @@
 package com.devapps.aquatraking.fragments
 
-import com.devapps.aquatraking.activities.TeamsActivity
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -9,6 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import com.devapps.aquatraking.R
 import com.devapps.aquatraking.activities.AuthActivity
+import com.devapps.aquatraking.activities.GroupsMenuActivity
+import com.devapps.aquatraking.activities.ModulesActivity
+import com.devapps.aquatraking.activities.NotificationsMenuActivity
+import com.devapps.aquatraking.activities.StorageMenuActivity
+import com.devapps.aquatraking.activities.ThemesMenuActivity
 import com.devapps.aquatraking.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
@@ -51,9 +55,33 @@ class SettingsFragment : Fragment() {
             logoutConfirmationDialog()
         }
 
-        binding.llOption3.setOnClickListener{
-            val intent = Intent(activity, TeamsActivity::class.java)
+        binding.llOption1.setOnClickListener{
+            val intent = Intent(activity, NotificationsMenuActivity::class.java)
             startActivity(intent)
+        }
+
+        binding.llOption2.setOnClickListener{
+            val intent = Intent(activity, StorageMenuActivity::class.java)
+            startActivity(intent)
+        }
+
+        binding.llOption3.setOnClickListener{
+            val intent = Intent(activity, ModulesActivity::class.java)
+            startActivity(intent)
+        }
+
+        binding.llOption4.setOnClickListener{
+            val intent = Intent(activity, GroupsMenuActivity::class.java)
+            startActivity(intent)
+        }
+
+        binding.llOption5.setOnClickListener{
+            val intent = Intent(activity, ThemesMenuActivity::class.java)
+            startActivity(intent)
+        }
+
+        binding.llOption6.setOnClickListener{
+            //No menu
         }
     }
 
