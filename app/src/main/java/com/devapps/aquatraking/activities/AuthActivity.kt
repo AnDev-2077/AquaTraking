@@ -64,20 +64,50 @@ class AuthActivity : AppCompatActivity() {
         prefs.putString("email", email)
         prefs.putString("provider", provider.name)
         prefs.apply()
+
+        finish()
     }
 
-    private fun saveUserToFirestore(email: String, uid: String, profileImageUrl: String?) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == GOOGLE_SIGN_IN) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                if (account != null) {
+                    val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+                    FirebaseAuth.getInstance().signInWithCredential(credential).addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val email = account.email ?: ""
+                            val name = account.displayName ?: ""
+                            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                            val profileImageUrl = account.photoUrl?.toString()
+                            saveUserToFirestore(email, uid, profileImageUrl, name)
+
+                            showHome(email, ProviderType.GOOGLE)
+                        } else {
+                            showAlert()
+                        }
+                    }
+                }
+            } catch (e: ApiException) {
+                showAlert()
+                Log.e("AuthActivity", "Error al autenticar con Google", e)
+            }
+        }
+    }
+
+    private fun saveUserToFirestore(email: String, uid: String, profileImageUrl: String?, name: String) {
         val db = FirebaseFirestore.getInstance()
         val userRef = db.collection("users").document(uid)
 
-        Log.d("AuthActivity", "Guardando usuario con UID: $uid")
-        Log.d("AuthActivity", "Imagen de perfil: $profileImageUrl")
 
         userRef.get().addOnSuccessListener { document ->
             if (!document.exists()) {
                 val userData = mapOf(
                     "email" to email,
-                    "name" to "Nombre por defecto",
+                    "modules" to listOf<String>(),
+                    "name" to name,
                     "profileImageUrl" to (profileImageUrl ?: "")
                 )
 
@@ -98,31 +128,8 @@ class AuthActivity : AppCompatActivity() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == GOOGLE_SIGN_IN) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            try {
-                val account = task.getResult(ApiException::class.java)
-                if (account != null) {
-                    val credential = GoogleAuthProvider.getCredential(account.idToken, null)
-                    FirebaseAuth.getInstance().signInWithCredential(credential).addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            val email = account.email ?: ""
-                            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-                            val profileImageUrl = account.photoUrl?.toString()
-                            saveUserToFirestore(email, uid, profileImageUrl)
-
-                            showHome(email, ProviderType.GOOGLE)
-                        } else {
-                            showAlert()
-                        }
-                    }
-                }
-            } catch (e: ApiException) {
-                showAlert()
-                Log.e("AuthActivity", "Error al autenticar con Google", e)
-            }
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("AuthActivity", "Activity is being destroyed")
     }
 }

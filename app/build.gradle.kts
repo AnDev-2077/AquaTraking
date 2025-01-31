@@ -59,10 +59,6 @@ dependencies {
     implementation("com.firebaseui:firebase-ui-auth:7.2.0")
     implementation("com.squareup.picasso:picasso:2.8")
 
-    implementation("com.google.mlkit:barcode-scanning:17.2.0")
-    implementation("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.0")
-
-
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

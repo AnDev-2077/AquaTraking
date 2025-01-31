@@ -3,6 +3,7 @@ package com.devapps.aquatraking.activities
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.devapps.aquatraking.databinding.ActivityAddModuleByCodeBinding
 import com.google.android.material.appbar.MaterialToolbar
@@ -11,7 +12,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 
 class AddModuleByCodeActivity : AppCompatActivity() {
@@ -73,23 +74,38 @@ class AddModuleByCodeActivity : AppCompatActivity() {
         userDocRef.get()
             .addOnSuccessListener { documentSnapshot ->
                 if (documentSnapshot.exists()) {
-                    val userModulesRef = userDocRef.collection("modules")
 
-                    userModulesRef.document(moduleKey).get()
-                        .addOnSuccessListener { moduleDocumentSnapshot ->
-                            if (moduleDocumentSnapshot.exists()) {
-                                Toast.makeText(this, "El módulo ya está vinculado a tu cuenta.", Toast.LENGTH_SHORT).show()
-                            } else {
-                                addModuleKeyToUser(userModulesRef, moduleKey)
+                    val userData = documentSnapshot.data
+                    val modules = userData?.get("modules") as? MutableList<String> ?: mutableListOf()
+
+                    if (modules.contains(moduleKey)) {
+                        Toast.makeText(this, "El módulo ya está vinculado a tu cuenta.", Toast.LENGTH_SHORT).show()
+                    } else {
+
+                        modules.add(moduleKey)
+
+                        userDocRef.update("modules", modules)
+                            .addOnSuccessListener {
+                                val sharedPreferences = getSharedPreferences("UserPreferences", MODE_PRIVATE)
+                                sharedPreferences.edit().putString("moduleKey", moduleKey).apply()
+                                Toast.makeText(this, "Módulo vinculado correctamente.", Toast.LENGTH_SHORT).show()
                             }
+                            .addOnFailureListener {
+                                Toast.makeText(this, "Error al vincular el módulo: ${it.message}", Toast.LENGTH_SHORT).show()
+                            }
+                    }
+                } else {
+
+                    val userData = mapOf("modules" to listOf(moduleKey))
+                    userDocRef.set(userData)
+                        .addOnSuccessListener {
+                            val sharedPreferences = getSharedPreferences("UserPreferences", MODE_PRIVATE)
+                            sharedPreferences.edit().putString("moduleKey", moduleKey).apply()
+                            Toast.makeText(this, "Módulo vinculado correctamente.", Toast.LENGTH_SHORT).show()
                         }
                         .addOnFailureListener {
-                            Toast.makeText(this, "Error al obtener el módulo: ${it.message}", Toast.LENGTH_SHORT).show()
-                            Log.e("AddModuleByCodeActivity", "Error al obtener el módulo", it)
+                            Toast.makeText(this, "Error al crear el usuario: ${it.message}", Toast.LENGTH_SHORT).show()
                         }
-                } else {
-                    val userModulesRef = userDocRef.collection("modules")
-                    addModuleKeyToUser(userModulesRef, moduleKey)
                 }
             }
             .addOnFailureListener {
@@ -98,19 +114,23 @@ class AddModuleByCodeActivity : AppCompatActivity() {
             }
     }
 
-    private fun addModuleKeyToUser(userModulesRef: CollectionReference, moduleKey: String) {
-        val moduleData = mapOf("moduleKey" to moduleKey)
 
-        userModulesRef.document(moduleKey).set(moduleData)
-            .addOnSuccessListener {
-                val sharedPreferences = getSharedPreferences("UserPreferences", MODE_PRIVATE)
-                sharedPreferences.edit().putString("moduleKey", moduleKey).apply()
-                Toast.makeText(this, "Módulo vinculado correctamente.", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Error al vincular el módulo: ${it.message}", Toast.LENGTH_SHORT).show()
-            }
+
+    private fun saveModuleKeyLocally(moduleKey: String) {
+        val sharedPreferences = getSharedPreferences("UserPreferences", MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("moduleKey", moduleKey)
+        editor.apply()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("AuthActivity", "Activity is being destroyed")
+    }
 
 }
+
+
+
+
+
