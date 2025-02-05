@@ -32,7 +32,7 @@
                 android:layout_height="match_parent">
 
                 <ImageButton
-                    android:id="@+id/btnPrevious"
+                    android:id="@+id/btnPreviousWeek"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
@@ -42,19 +42,19 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/tvCurrentDate"
+                    android:id="@+id/tvWeek"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Hoy"
+                    android:text="Esta semana"
                     android:textColor="@android:color/black"
                     android:textSize="16sp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/btnNext"
-                    app:layout_constraintStart_toEndOf="@id/btnPrevious"
+                    app:layout_constraintEnd_toStartOf="@id/btnNextWeek"
+                    app:layout_constraintStart_toEndOf="@id/btnPreviousWeek"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageButton
-                    android:id="@+id/btnNext"
+                    android:id="@+id/btnNextWeek"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:background="?attr/selectableItemBackgroundBorderless"

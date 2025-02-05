@@ -119,16 +119,6 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun updateDateTex(){
-        val formattedDate = when {
-            isToday() -> "Hoy"
-            isYesterday() -> "Ayer"
-            else -> dateFormat.format(currentDate.time)
-        }
-        binding.tvCurrentDate.text = formattedDate
-        Log.d("HomeFragment", "Fecha actualizada: $formattedDate")
-    }
-
     private fun changeDate(days: Int){
         val newDate = Calendar.getInstance().apply {
             time = currentDate.time
@@ -147,6 +137,16 @@ class HomeFragment : Fragment() {
 
         currentDate.add(Calendar.DAY_OF_MONTH, days)
         updateDateTex()
+    }
+
+    private fun updateDateTex(){
+        val formattedDate = when {
+            isToday() -> "Hoy"
+            isYesterday() -> "Ayer"
+            else -> dateFormat.format(currentDate.time)
+        }
+        binding.tvDate.text = formattedDate
+        Log.d("HomeFragment", "Fecha actualizada: $formattedDate")
     }
 
     private fun isToday(): Boolean{

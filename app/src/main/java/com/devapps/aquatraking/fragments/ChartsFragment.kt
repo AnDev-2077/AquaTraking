@@ -2,6 +2,7 @@ package com.devapps.aquatraking.fragments
 
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +15,11 @@ import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.FirebaseDatabase
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -25,6 +31,8 @@ class ChartsFragment : Fragment() {
 
     private var _binding: FragmentChartsBinding? = null
     private val binding get() = _binding!!
+
+    private val moduleId = "-O9AOGhgVPLt464eEULY"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,68 +53,87 @@ class ChartsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val dataEntries = listOf(
-            Entry(0f, 60f),
-            Entry(1f, 75f),
-            Entry(2f, 40f),
-            Entry(3f, 90f),
-            Entry(4f, 20f),
-            Entry(5f, 50f),
-            Entry(6f, 85f),
 
-        )
-        val dataSet = LineDataSet(dataEntries, "")
-        dataSet.setDrawFilled(true)
-        val gradientDrawable: Drawable? = ContextCompat.getDrawable(requireContext(), R.drawable.gradient_fill)
-        dataSet.fillDrawable = gradientDrawable
-        dataSet.color = resources.getColor(R.color.blue, null)
-        dataSet.valueTextColor = resources.getColor(R.color.black, null)
-        dataSet.setDrawHorizontalHighlightIndicator(false)
-        dataSet.setDrawVerticalHighlightIndicator(true)
-        dataSet.enableDashedHighlightLine(10f, 5f, 0f)
-        dataSet.highlightLineWidth = 1.5f
-        dataSet.highLightColor = resources.getColor(R.color.gray, null)
-        dataSet.setDrawCircles(true)
-        dataSet.setCircleColor(resources.getColor(R.color.blue, null))
-        dataSet.circleHoleColor = resources.getColor(R.color.blue, null)
-        dataSet.setDrawValues(false)
-        dataSet.lineWidth = 2f
-        dataSet.circleRadius = 6f
+        actualizarGraficoConSemana(weekOffset = 0)
 
+        binding.btnNextWeek.setOnClickListener {
+            actualizarGraficoConSemana(weekOffset = 0)
+            binding.tvWeek.text = "Semana actual"
+        }
+        binding.btnPreviousWeek.setOnClickListener {
+            actualizarGraficoConSemana(weekOffset = -1)
+            binding.tvWeek.text = "Semana anterior"
+        }
 
-
-        val lineData = LineData(dataSet)
-        binding.lineChart.data = lineData
-
-        binding.lineChart.description.isEnabled = false
-        binding.lineChart.legend.isEnabled = false
-
-        val markerView = CustomMarkerView(requireContext())
-        markerView.chartView = binding.lineChart
-        binding.lineChart.marker = markerView
-
-        //setup X Axis
-        val xAxis = binding.lineChart.xAxis
-        xAxis.position = XAxis.XAxisPosition.BOTTOM
-        xAxis.setDrawGridLines(false)
-        xAxis.valueFormatter = XAxisValueFormatter()
-        xAxis.labelCount = 7
-        xAxis.granularity = 1f
-
-        //setup Y Axis
-        val yAxisLeft = binding.lineChart.axisLeft
-        yAxisLeft.axisMinimum = 0f
-        yAxisLeft.axisMaximum = 100f
-        yAxisLeft.granularity = 25f
-        yAxisLeft.enableGridDashedLine(10f,10f,10f)
-        yAxisLeft.setDrawGridLines(true)
-
-        //disable right Y Axis
-        val yAxisRight = binding.lineChart.axisRight
-        yAxisRight.isEnabled = false
-
-        binding.lineChart.invalidate()
     }
+
+    private fun actualizarGraficoConSemana(weekOffset: Int) {
+        val database = FirebaseDatabase.getInstance()
+        val ref = database.getReference("ModulesWifi").child(moduleId)
+        ref.get().addOnSuccessListener { dataSnapshot ->
+            val entries = getEntriesForWeek(dataSnapshot, weekOffset)
+            if (entries.isNotEmpty()) {
+                val dataSet = LineDataSet(entries, "Porcentaje")
+                dataSet.setDrawFilled(true)
+                val gradientDrawable: Drawable? =
+                    ContextCompat.getDrawable(requireContext(), R.drawable.gradient_fill)
+                dataSet.fillDrawable = gradientDrawable
+                dataSet.color = resources.getColor(R.color.blue, null)
+                dataSet.valueTextColor = resources.getColor(R.color.black, null)
+                dataSet.setDrawHorizontalHighlightIndicator(false)
+                dataSet.setDrawVerticalHighlightIndicator(true)
+                dataSet.enableDashedHighlightLine(10f, 5f, 0f)
+                dataSet.highlightLineWidth = 1.5f
+                dataSet.highLightColor = resources.getColor(R.color.gray, null)
+                dataSet.setDrawCircles(true)
+                dataSet.setCircleColor(resources.getColor(R.color.blue, null))
+                dataSet.circleHoleColor = resources.getColor(R.color.blue, null)
+                dataSet.setDrawValues(false)
+                dataSet.lineWidth = 2f
+                dataSet.circleRadius = 6f
+
+                // Other customs
+                binding.lineChart.description.isEnabled = false
+                binding.lineChart.legend.isEnabled = false
+                val markerView = CustomMarkerView(requireContext())
+                markerView.chartView = binding.lineChart
+                binding.lineChart.marker = markerView
+
+                //setup X Axis
+                val xAxis = binding.lineChart.xAxis
+                xAxis.position = XAxis.XAxisPosition.BOTTOM
+                xAxis.setDrawGridLines(false)
+                xAxis.valueFormatter = XAxisValueFormatter()
+                xAxis.labelCount = 7
+                xAxis.granularity = 1f
+
+                //setup Y Axis
+                val yAxisLeft = binding.lineChart.axisLeft
+                yAxisLeft.axisMinimum = 0f
+                yAxisLeft.axisMaximum = 100f
+                yAxisLeft.granularity = 25f
+                yAxisLeft.enableGridDashedLine(10f,10f,10f)
+                yAxisLeft.setDrawGridLines(true)
+
+                //disable right Y Axis
+                val yAxisRight = binding.lineChart.axisRight
+                yAxisRight.isEnabled = false
+
+                val lineData = LineData(dataSet)
+                binding.lineChart.data = lineData
+                binding.lineChart.invalidate()
+
+            } else {
+                // No hay datos para la semana seleccionada: limpia el gráfico o muestra un mensaje.
+                binding.lineChart.clear()
+                binding.lineChart.invalidate()
+            }
+        }.addOnFailureListener { exception ->
+            // Maneja el error (por ejemplo, muestra un Toast o log)
+            exception.printStackTrace()
+        }
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -126,6 +153,44 @@ class ChartsFragment : Fragment() {
                 else -> ""
             }
         }
+    }
+
+    private fun getEntriesForWeek(dataSnapshot: DataSnapshot, weekOffset: Int): List<Entry> {
+        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        val entries = mutableListOf<Entry>()
+
+        // Obtener la semana objetivo
+        val calendarNow = Calendar.getInstance()
+        calendarNow.add(Calendar.WEEK_OF_YEAR, weekOffset)
+        val targetWeek = calendarNow.get(Calendar.WEEK_OF_YEAR)
+        val targetYear = calendarNow.get(Calendar.YEAR)
+
+        // Recorremos cada registro dentro del módulo
+        for (recordSnapshot in dataSnapshot.children) {
+            val fechaString = recordSnapshot.child("fecha").getValue(String::class.java)
+            val porcentajeStr = recordSnapshot.child("porcentaje").getValue(String::class.java)
+            if (!fechaString.isNullOrEmpty() && !porcentajeStr.isNullOrEmpty()) {
+                try {
+                    val date = sdf.parse(fechaString)
+                    val calendarRecord = Calendar.getInstance().apply { time = date }
+                    val recordWeek = calendarRecord.get(Calendar.WEEK_OF_YEAR)
+                    val recordYear = calendarRecord.get(Calendar.YEAR)
+                    if (recordYear == targetYear && recordWeek == targetWeek) {
+                        // Convertir el día de la semana a un índice para el eje X.
+                        // Calendar: domingo = 1, lunes = 2, …, sábado = 7.
+                        // Queremos: lunes = 0, martes = 1, …, domingo = 6.
+                        val dayOfWeek = calendarRecord.get(Calendar.DAY_OF_WEEK)
+                        val xValue = if (dayOfWeek == Calendar.SUNDAY) 6f else (dayOfWeek - 2).toFloat()
+                        val porcentaje = porcentajeStr.toFloatOrNull() ?: 0f
+                        entries.add(Entry(xValue, porcentaje))
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+        // Ordenamos las entradas por el valor X (día de la semana)
+        return entries.sortedBy { it.x }
     }
 
     companion object {
