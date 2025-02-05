@@ -40,7 +40,6 @@ class ChartsFragment : Fragment() {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
-
     }
 
     override fun onCreateView(
@@ -73,67 +72,23 @@ class ChartsFragment : Fragment() {
         ref.get().addOnSuccessListener { dataSnapshot ->
             val entries = getEntriesForWeek(dataSnapshot, weekOffset)
             if (entries.isNotEmpty()) {
-                val dataSet = LineDataSet(entries, "Porcentaje")
-                dataSet.setDrawFilled(true)
-                val gradientDrawable: Drawable? =
-                    ContextCompat.getDrawable(requireContext(), R.drawable.gradient_fill)
-                dataSet.fillDrawable = gradientDrawable
-                dataSet.color = resources.getColor(R.color.blue, null)
-                dataSet.valueTextColor = resources.getColor(R.color.black, null)
-                dataSet.setDrawHorizontalHighlightIndicator(false)
-                dataSet.setDrawVerticalHighlightIndicator(true)
-                dataSet.enableDashedHighlightLine(10f, 5f, 0f)
-                dataSet.highlightLineWidth = 1.5f
-                dataSet.highLightColor = resources.getColor(R.color.gray, null)
-                dataSet.setDrawCircles(true)
-                dataSet.setCircleColor(resources.getColor(R.color.blue, null))
-                dataSet.circleHoleColor = resources.getColor(R.color.blue, null)
-                dataSet.setDrawValues(false)
-                dataSet.lineWidth = 2f
-                dataSet.circleRadius = 6f
-
-                // Other customs
-                binding.lineChart.description.isEnabled = false
-                binding.lineChart.legend.isEnabled = false
-                val markerView = CustomMarkerView(requireContext())
-                markerView.chartView = binding.lineChart
-                binding.lineChart.marker = markerView
-
-                //setup X Axis
-                val xAxis = binding.lineChart.xAxis
-                xAxis.position = XAxis.XAxisPosition.BOTTOM
-                xAxis.setDrawGridLines(false)
-                xAxis.valueFormatter = XAxisValueFormatter()
-                xAxis.labelCount = 7
-                xAxis.granularity = 1f
-                xAxis.axisMinimum = 0f
-                xAxis.axisMaximum = 6f
-
-
-                //setup Y Axis
-                val yAxisLeft = binding.lineChart.axisLeft
-                yAxisLeft.axisMinimum = 0f
-                yAxisLeft.axisMaximum = 100f
-                yAxisLeft.granularity = 25f
-                yAxisLeft.enableGridDashedLine(10f,10f,10f)
-                yAxisLeft.setDrawGridLines(true)
-
-                //disable right Y Axis
-                val yAxisRight = binding.lineChart.axisRight
-                yAxisRight.isEnabled = false
-
-                //disable zoom
-                binding.lineChart.setScaleEnabled(false)
-                binding.lineChart.setPinchZoom(false)
-
-
+                val dataSet = crearDataSet(entries, "Porcentaje")
                 val lineData = LineData(dataSet)
                 binding.lineChart.data = lineData
                 binding.lineChart.invalidate()
-
             } else {
-                // No hay datos para la semana seleccionada: limpia el gráfico o muestra un mensaje.
-                binding.lineChart.clear()
+                val defaultEntries = listOf(
+                    Entry(0f, 0f),
+                    Entry(1f, 0f),
+                    Entry(2f, 0f),
+                    Entry(3f, 0f),
+                    Entry(4f, 0f),
+                    Entry(5f, 0f),
+                    Entry(6f, 0f)
+                )
+                val defaultDataSet = crearDataSet(defaultEntries, "Porcentaje predeterminado")
+                val lineData = LineData(defaultDataSet)
+                binding.lineChart.data = lineData
                 binding.lineChart.invalidate()
             }
         }.addOnFailureListener { exception ->
@@ -142,10 +97,69 @@ class ChartsFragment : Fragment() {
         }
     }
 
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun crearDataSet(entries: List<Entry>, label: String): LineDataSet {
+        val dataSet = LineDataSet(entries, label)
+        dataSet.setDrawFilled(true)
+        val gradientDrawable: Drawable? =
+            ContextCompat.getDrawable(requireContext(), R.drawable.gradient_fill)
+        dataSet.fillDrawable = gradientDrawable
+        dataSet.color = resources.getColor(R.color.blue, null)
+        dataSet.valueTextColor = resources.getColor(R.color.black, null)
+        dataSet.setDrawHorizontalHighlightIndicator(false)
+        dataSet.setDrawVerticalHighlightIndicator(true)
+        dataSet.enableDashedHighlightLine(10f, 5f, 0f)
+        dataSet.highlightLineWidth = 1.5f
+        dataSet.highLightColor = resources.getColor(R.color.gray, null)
+        dataSet.setDrawCircles(true)
+        dataSet.setCircleColor(resources.getColor(R.color.blue, null))
+        dataSet.circleHoleColor = resources.getColor(R.color.blue, null)
+        dataSet.setDrawValues(false)
+        dataSet.lineWidth = 2f
+        dataSet.circleRadius = 6f
+
+        //other customs
+        binding.lineChart.description.isEnabled = false
+        binding.lineChart.legend.isEnabled = false
+        val markerView = CustomMarkerView(requireContext())
+        markerView.chartView = binding.lineChart
+        binding.lineChart.marker = markerView
+
+        //setup X Axis
+        val xAxis = binding.lineChart.xAxis
+        xAxis.position = XAxis.XAxisPosition.BOTTOM
+        xAxis.setDrawGridLines(false)
+        xAxis.valueFormatter = XAxisValueFormatter()
+        xAxis.labelCount = 7
+        xAxis.granularity = 1f
+        xAxis.axisMinimum = 0f
+        xAxis.axisMaximum = 6f
+
+        //setup Y Axis
+        val yAxisLeft = binding.lineChart.axisLeft
+        yAxisLeft.axisMinimum = 0f
+        yAxisLeft.axisMaximum = 100f
+        yAxisLeft.granularity = 25f
+        yAxisLeft.enableGridDashedLine(10f,10f,10f)
+        yAxisLeft.setDrawGridLines(true)
+
+        //disable right Y Axis
+        val yAxisRight = binding.lineChart.axisRight
+        yAxisRight.isEnabled = false
+
+        //disable zoom
+        binding.lineChart.setScaleEnabled(false)
+        binding.lineChart.setPinchZoom(false)
+
+        val lineData = LineData(dataSet)
+        binding.lineChart.data = lineData
+        binding.lineChart.invalidate()
+
+        return dataSet
     }
 
     class XAxisValueFormatter : com.github.mikephil.charting.formatter.ValueFormatter() {
