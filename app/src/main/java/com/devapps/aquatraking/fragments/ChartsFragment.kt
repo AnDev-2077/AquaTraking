@@ -106,6 +106,9 @@ class ChartsFragment : Fragment() {
                 xAxis.valueFormatter = XAxisValueFormatter()
                 xAxis.labelCount = 7
                 xAxis.granularity = 1f
+                xAxis.axisMinimum = 0f
+                xAxis.axisMaximum = 6f
+
 
                 //setup Y Axis
                 val yAxisLeft = binding.lineChart.axisLeft
@@ -118,6 +121,11 @@ class ChartsFragment : Fragment() {
                 //disable right Y Axis
                 val yAxisRight = binding.lineChart.axisRight
                 yAxisRight.isEnabled = false
+
+                //disable zoom
+                binding.lineChart.setScaleEnabled(false)
+                binding.lineChart.setPinchZoom(false)
+
 
                 val lineData = LineData(dataSet)
                 binding.lineChart.data = lineData
