@@ -14,7 +14,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 
-class AddModuleByCodeActivity : AppCompatActivity() {
+class AddDeviceActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddModuleByCodeBinding
 
@@ -52,14 +52,14 @@ class AddModuleByCodeActivity : AppCompatActivity() {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if(snapshot.exists()){
                         linkModuleToUser(userId,key)
-                        Toast.makeText(this@AddModuleByCodeActivity, "La clave existe en la base de datos.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@AddDeviceActivity, "La clave existe en la base de datos.", Toast.LENGTH_SHORT).show()
                     }else{
-                        Toast.makeText(this@AddModuleByCodeActivity, "La clave no existe en la base de datos.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@AddDeviceActivity, "La clave no existe en la base de datos.", Toast.LENGTH_SHORT).show()
                     }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-                    Toast.makeText(this@AddModuleByCodeActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@AddDeviceActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
                 }
 
             })
@@ -118,18 +118,18 @@ class AddModuleByCodeActivity : AppCompatActivity() {
         val userDocRef = firestore.collection("users").document(userId)
         val moduleDocRef = firestore.collection("modules").document(moduleKey)
 
-        // Verificar si el módulo ya existe en la colección "modules" fuera de la transacción
+        //Verificar si el módulo ya existe en la colección "modules" fuera de la transacción
         moduleDocRef.get().addOnSuccessListener { moduleSnapshot ->
             if (moduleSnapshot.exists()) {
-                // El módulo ya está registrado por otro usuario
+                //El módulo ya está registrado por otro usuario
                 Toast.makeText(this, "Este módulo ya está registrado por otro usuario.", Toast.LENGTH_SHORT).show()
             } else {
-                // Ejecutar la transacción
+                //Ejecutar la transacción
                 firestore.runTransaction { transaction ->
-                    // 1. Realizar todas las lecturas primero
+                    //1.Realizar todas las lecturas primero
                     val userSnapshot = transaction.get(userDocRef)
                     val moduleSnapshotInside = transaction.get(moduleDocRef)
-                    // Aunque ya se verificó fuera de la transacción, se vuelve a leer para garantizar consistencia
+                    //Aunque ya se verificó fuera de la transacción, se vuelve a leer para garantizar consistencia
                     if (moduleSnapshotInside.exists()) {
                         throw FirebaseFirestoreException(
                             "El módulo ya está registrado por otro usuario.",
@@ -143,17 +143,16 @@ class AddModuleByCodeActivity : AppCompatActivity() {
                             FirebaseFirestoreException.Code.ABORTED
                         )
                     }
-
-                    // 2. Una vez terminadas las lecturas, realizar las escrituras
+                    //2. Una vez terminadas las lecturas, realizar las escrituras
                     transaction.set(moduleDocRef, hashMapOf("owner" to userId))
                     modules.add(moduleKey)
                     transaction.update(userDocRef, "modules", modules)
                 }.addOnSuccessListener {
-                    // Guardar el módulo localmente (opcional)
+                    //Guardar el módulo localmente (opcional)
                     saveModuleKeyLocally(moduleKey)
                     Toast.makeText(this, "Módulo vinculado correctamente.", Toast.LENGTH_SHORT).show()
                 }.addOnFailureListener { e ->
-                    // Manejar errores
+                    //Manejar errores
                     Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                     Log.e("AddModuleByCodeActivity", "Error al vincular el módulo", e)
                 }
@@ -164,7 +163,6 @@ class AddModuleByCodeActivity : AppCompatActivity() {
             Log.e("AddModuleByCodeActivity", "Error al verificar el módulo", e)
         }
     }
-
 
     private fun saveModuleKeyLocally(moduleKey: String) {
         val sharedPreferences = getSharedPreferences("UserPreferences", MODE_PRIVATE)

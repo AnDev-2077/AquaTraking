@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import com.devapps.aquatraking.R
 import com.devapps.aquatraking.activities.AuthActivity
 import com.devapps.aquatraking.activities.GroupsMenuActivity
-import com.devapps.aquatraking.activities.ModulesActivity
+import com.devapps.aquatraking.activities.DevicesActivity
 import com.devapps.aquatraking.activities.NotificationsMenuActivity
 import com.devapps.aquatraking.activities.StorageMenuActivity
 import com.devapps.aquatraking.activities.ThemesMenuActivity
@@ -66,7 +66,7 @@ class SettingsFragment : Fragment() {
         }
 
         binding.llOption3.setOnClickListener{
-            val intent = Intent(activity, ModulesActivity::class.java)
+            val intent = Intent(activity, DevicesActivity::class.java)
             startActivity(intent)
         }
 
