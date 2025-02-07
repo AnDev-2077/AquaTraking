@@ -17,7 +17,7 @@ class CustomMarkerView (context: Context) : MarkerView(context, R.layout.item_ma
         binding = ItemMarkerViewBinding.inflate(inflater, this, true)
     }
 
-    private val daysOfWeek = listOf("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")
+    private val daysOfWeek = listOf("Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Savado", "Domingo")
 
     override fun refreshContent(e: Entry?, highlight: Highlight?) {
         if (e != null) {

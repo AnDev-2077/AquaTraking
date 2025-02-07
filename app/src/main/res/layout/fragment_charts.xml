@@ -45,7 +45,7 @@
                     android:id="@+id/tvWeek"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Esta semana"
+                    android:text="Semana actual"
                     android:textColor="@android:color/black"
                     android:textSize="16sp"
                     app:layout_constraintBottom_toBottomOf="parent"

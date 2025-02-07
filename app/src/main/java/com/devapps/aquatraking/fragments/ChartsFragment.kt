@@ -11,10 +11,12 @@ import androidx.core.content.ContextCompat
 import com.devapps.aquatraking.views.CustomMarkerView
 import com.devapps.aquatraking.R
 import com.devapps.aquatraking.databinding.FragmentChartsBinding
+import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.google.android.material.datepicker.DateValidatorPointBackward.before
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.FirebaseDatabase
 import java.text.SimpleDateFormat
@@ -159,6 +161,9 @@ class ChartsFragment : Fragment() {
         binding.lineChart.data = lineData
         binding.lineChart.invalidate()
 
+        //enable animations
+        binding.lineChart.animateY(1000, Easing.EaseInCubic)
+
         return dataSet
     }
 
@@ -181,28 +186,40 @@ class ChartsFragment : Fragment() {
         val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val entries = mutableListOf<Entry>()
 
-        // Obtener la semana objetivo
-        val calendarNow = Calendar.getInstance()
-        calendarNow.add(Calendar.WEEK_OF_YEAR, weekOffset)
-        val targetWeek = calendarNow.get(Calendar.WEEK_OF_YEAR)
-        val targetYear = calendarNow.get(Calendar.YEAR)
+        // Configurar calendario con locale apropiado (Lunes como primer día)
+        val calendarNow = Calendar.getInstance().apply {
+            firstDayOfWeek = Calendar.SUNDAY
+            add(Calendar.WEEK_OF_YEAR, weekOffset)
+            set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+        }
 
-        // Recorremos cada registro dentro del módulo
+        // Obtener fecha de inicio y fin de la semana
+        val startOfWeek = calendarNow.clone() as Calendar
+        val endOfWeek = calendarNow.clone() as Calendar
+        endOfWeek.add(Calendar.DAY_OF_WEEK, 7)
+
+        // Recorrer registros
         for (recordSnapshot in dataSnapshot.children) {
             val fechaString = recordSnapshot.child("fecha").getValue(String::class.java)
             val porcentajeStr = recordSnapshot.child("porcentaje").getValue(String::class.java)
+
             if (!fechaString.isNullOrEmpty() && !porcentajeStr.isNullOrEmpty()) {
                 try {
                     val date = sdf.parse(fechaString)
-                    val calendarRecord = Calendar.getInstance().apply { time = date }
-                    val recordWeek = calendarRecord.get(Calendar.WEEK_OF_YEAR)
-                    val recordYear = calendarRecord.get(Calendar.YEAR)
-                    if (recordYear == targetYear && recordWeek == targetWeek) {
-                        // Convertir el día de la semana a un índice para el eje X.
-                        // Calendar: domingo = 1, lunes = 2, …, sábado = 7.
-                        // Queremos: lunes = 0, martes = 1, …, domingo = 6.
-                        val dayOfWeek = calendarRecord.get(Calendar.DAY_OF_WEEK)
-                        val xValue = if (dayOfWeek == Calendar.SUNDAY) 6f else (dayOfWeek - 2).toFloat()
+                    val recordCalendar = Calendar.getInstance().apply { time = date }
+
+                    // Verificar si la fecha está dentro del rango de la semana
+                    if (!recordCalendar.before(startOfWeek) && !recordCalendar.after(endOfWeek)) {
+                        val xValue = when (recordCalendar.get(Calendar.DAY_OF_WEEK)) {
+                            Calendar.MONDAY -> 0f
+                            Calendar.TUESDAY -> 1f
+                            Calendar.WEDNESDAY -> 2f
+                            Calendar.THURSDAY -> 3f
+                            Calendar.FRIDAY -> 4f
+                            Calendar.SATURDAY -> 5f
+                            Calendar.SUNDAY -> 6f
+                            else -> 0f
+                        }
                         val porcentaje = porcentajeStr.toFloatOrNull() ?: 0f
                         entries.add(Entry(xValue, porcentaje))
                     }
@@ -211,8 +228,11 @@ class ChartsFragment : Fragment() {
                 }
             }
         }
-        // Ordenamos las entradas por el valor X (día de la semana)
-        return entries.sortedBy { it.x }
+
+        // Ordenar y completar días faltantes
+        return (0..6).map { x ->
+            entries.firstOrNull { it.x == x.toFloat() } ?: Entry(x.toFloat(), 0f)
+        }.sortedBy { it.x }
     }
 
     companion object {
