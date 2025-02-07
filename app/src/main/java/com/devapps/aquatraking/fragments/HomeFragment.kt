@@ -8,7 +8,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import com.devapps.aquatraking.databinding.FragmentHomeBinding
 import com.devapps.aquatraking.services.ForegroundService
 import com.devapps.aquatraking.views.WaveLoadView
@@ -31,7 +30,12 @@ class HomeFragment : Fragment() {
     private var waveView: WaveLoadView? = null
     private lateinit var database: DatabaseReference
     private var currentDate: Calendar = Calendar.getInstance()
-    private val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+    private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+
+    private var consumoListener: ChildEventListener? = null
+
+    private val maxDaysBack = 5
+    private var currentOffset = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,110 +60,107 @@ class HomeFragment : Fragment() {
         val serviceIntent = Intent(requireContext(), ForegroundService::class.java)
         requireContext().startService(serviceIntent)
 
-        database = FirebaseDatabase.getInstance().reference
-        initFirebaseListener()
+        waveView = binding.waveView
 
-        binding.btnNext.setOnClickListener {
-            changeDate(1)
-        }
+        database = FirebaseDatabase.getInstance().reference
+
+        database = FirebaseDatabase.getInstance().getReference("/ModulesWifi/-O9AOGhgVPLt464eEULY")
+
+        binding.tvDate.text = dateFormat.format(currentDate.time)
+
+        actualizarFechaDisplay()
 
         binding.btnPrevious.setOnClickListener{
-            changeDate(-1)
+            /*currentDate.add(Calendar.DATE, -1)
+            rebootListener()
+            actualizarConsumoPorDia(dateFormat.format(currentDate.time))*/
+            if (currentOffset < maxDaysBack) {
+                currentOffset++
+                actualizarFechaDisplay()
+                actualizarConsumoPorDia()
+            }
         }
+
+        binding.btnNext.setOnClickListener{
+            /*currentDate.add(Calendar.DATE, 1)
+            rebootListener()
+            actualizarConsumoPorDia(dateFormat.format(currentDate.time))*/
+            if (currentOffset > 0) {
+                currentOffset--
+                actualizarFechaDisplay()
+                actualizarConsumoPorDia()
+            }
+        }
+        actualizarConsumoPorDia()
     }
 
-    private fun initViews() {
-        waveView = binding.waveView
+    private fun rebootListener() {
+        consumoListener?.let { database.removeEventListener(it) }
     }
 
-    private fun initFirebaseListener() {
+    private fun actualizarFechaDisplay() {
+        val calendar = Calendar.getInstance().apply {
+            add(Calendar.DATE, -currentOffset)
+        }
 
-        val sharedPreferences = requireContext().getSharedPreferences("UserPreferences", AppCompatActivity.MODE_PRIVATE)
-        val moduleKey = sharedPreferences.getString("moduleKey", null)
+        binding.tvDate.text = when (currentOffset) {
+            0 -> "Hoy"
+            1 -> "Ayer"
+            else -> SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(calendar.time)
+        }
 
-        Log.d("HomeFragment", "initFirebaseListener called")
-        database = FirebaseDatabase.getInstance().getReference("/ModulesWifi/$moduleKey")
+        // Actualizar estado de los botones
+        binding.btnPrevious.isEnabled = currentOffset < maxDaysBack
+        binding.btnNext.isEnabled = currentOffset > 0
+    }
 
-        database.addChildEventListener(object : ChildEventListener {
+    private fun actualizarConsumoPorDia() {
+
+        rebootListener()
+
+        val targetDate = Calendar.getInstance().apply {
+            add(Calendar.DATE, -currentOffset)
+        }
+        val fechaFormateada = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(targetDate.time)
+
+        // Se crea una query para filtrar por el campo "fecha"
+        val query = database.orderByChild("fecha").equalTo(fechaFormateada)
+        consumoListener = query.addChildEventListener(object : ChildEventListener {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-                updateProgressBasedOnDate(snapshot)
+                updateWaveView(snapshot)
             }
 
             override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-                updateProgressBasedOnDate(snapshot)
+                updateWaveView(snapshot)
             }
 
-            override fun onChildRemoved(snapshot: DataSnapshot) {}
-            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+            override fun onChildRemoved(snapshot: DataSnapshot) {
+                // Puedes implementar lógica si se elimina un registro
+            }
+
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+                // No es necesario para este caso
+            }
+
             override fun onCancelled(error: DatabaseError) {
                 Log.e("HomeFragment", "Error al leer datos: ${error.message}")
             }
         })
     }
 
-    private fun sendForegroundService(porcentaje: Float){
-        val intent = Intent(requireContext(), ForegroundService::class.java)
-        intent.putExtra("porcentaje", porcentaje)
-        requireContext().startService(intent)
-    }
-
-    private fun updateProgressBasedOnDate(snapshot: DataSnapshot) {
-        val selectedDate = dateFormat.format(currentDate.time)
-        val fecha = snapshot.child("fecha").getValue(String::class.java)
+    private fun updateWaveView(snapshot: DataSnapshot) {
         val porcentaje = snapshot.child("porcentaje").getValue(String::class.java)?.toFloatOrNull()
-
-        Log.d("HomeFragment", "Datos obtenidos - Fecha: $fecha, Porcentaje: $porcentaje")
-
-        if (fecha == selectedDate && porcentaje != null) {
-            initViews()
+        if (porcentaje != null) {
             waveView?.setProgress(porcentaje)
-            Log.d("HomeFragment", "Porcentaje actualizado ($selectedDate): $porcentaje%")
+            Log.d("HomeFragment", "Porcentaje actualizado: $porcentaje% para la fecha: ${snapshot.child("fecha").value}")
         } else {
-            Log.e("HomeFragment", "No hay datos para la fecha: $selectedDate o el porcentaje es nulo")
+            Log.e("HomeFragment", "El porcentaje es nulo o no válido")
         }
     }
 
-    private fun changeDate(days: Int){
-        val newDate = Calendar.getInstance().apply {
-            time = currentDate.time
-            add(Calendar.DAY_OF_MONTH, days)
-        }
-
-        val today = Calendar.getInstance()
-        val threeDaysAgo = Calendar.getInstance().apply {
-            add(Calendar.DAY_OF_MONTH, -3)
-        }
-
-        if (newDate.before(threeDaysAgo) || newDate.after(today)) {
-            Log.d("HomeFragment", "La fecha no puede ser más de dos días antes o después de hoy")
-            return
-        }
-
-        currentDate.add(Calendar.DAY_OF_MONTH, days)
-        updateDateTex()
-    }
-
-    private fun updateDateTex(){
-        val formattedDate = when {
-            isToday() -> "Hoy"
-            isYesterday() -> "Ayer"
-            else -> dateFormat.format(currentDate.time)
-        }
-        binding.tvDate.text = formattedDate
-        Log.d("HomeFragment", "Fecha actualizada: $formattedDate")
-    }
-
-    private fun isToday(): Boolean{
-        val today = Calendar.getInstance()
-        return today.get(Calendar.YEAR) == currentDate.get(Calendar.YEAR) &&
-                today.get(Calendar.DAY_OF_YEAR) == currentDate.get(Calendar.DAY_OF_YEAR)
-    }
-
-    private fun isYesterday(): Boolean {
-        val yesterday = Calendar.getInstance()
-        yesterday.add(Calendar.DAY_OF_MONTH, -1)
-        return yesterday.get(Calendar.YEAR) == currentDate.get(Calendar.YEAR) &&
-                yesterday.get(Calendar.DAY_OF_YEAR) == currentDate.get(Calendar.DAY_OF_YEAR)
+    override fun onDestroyView() {
+        super.onDestroyView()
+        rebootListener()
     }
 
 
