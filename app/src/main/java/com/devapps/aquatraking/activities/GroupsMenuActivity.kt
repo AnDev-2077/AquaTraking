@@ -3,7 +3,6 @@ package com.devapps.aquatraking.activities
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.devapps.aquatraking.R
 import com.devapps.aquatraking.databinding.ActivityGroupsMenuBinding
 import com.google.android.material.appbar.MaterialToolbar
 
@@ -23,7 +22,7 @@ class GroupsMenuActivity : AppCompatActivity() {
         }
 
         binding.llOption1.setOnClickListener{
-            val intent = Intent(this, TeamsActivity::class.java)
+            val intent = Intent(this, GroupsActivity::class.java)
             startActivity(intent)
         }
     }

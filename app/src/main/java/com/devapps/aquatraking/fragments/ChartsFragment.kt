@@ -114,7 +114,6 @@ class ChartsFragment : Fragment() {
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {
-                    // No hacer nada
                 }
             }
         } else if (modulesList.size == 1) {

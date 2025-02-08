@@ -45,7 +45,7 @@
             android:name=".activities.StorageMenuActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.TeamsActivity"
+            android:name=".activities.GroupsActivity"
             android:exported="false" />
         <activity
             android:name=".activities.AuthActivity"

@@ -17,7 +17,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 
-class TeamsActivity : AppCompatActivity() {
+class GroupsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityTeamsBinding
     private lateinit var membersAdapter: MembersAdapter
@@ -31,7 +31,7 @@ class TeamsActivity : AppCompatActivity() {
 
         membersAdapter = MembersAdapter(mutableListOf())
         binding.rvMembers.apply {
-            layoutManager = LinearLayoutManager(this@TeamsActivity)
+            layoutManager = LinearLayoutManager(this@GroupsActivity)
             adapter = membersAdapter
         }
 
@@ -92,27 +92,27 @@ class TeamsActivity : AppCompatActivity() {
                             membersAdapter.addMember(userEmail, profileImageUrl)
                             updateRecyclerViewVisibility()
                             Toast.makeText(
-                                this@TeamsActivity,
+                                this@GroupsActivity,
                                 "Usuario $userEmail agregado al grupo.",
                                 Toast.LENGTH_SHORT
                             ).show()
                         } else {
                             Toast.makeText(
-                                this@TeamsActivity,
+                                this@GroupsActivity,
                                 "El usuario ya está en el grupo.",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
 
                         Toast.makeText(
-                            this@TeamsActivity,
+                            this@GroupsActivity,
                             "El usuario con correo $emailToSearch está registrado como $userEmail.",
                             Toast.LENGTH_SHORT
                         ).show()
                     } else {
                         // Usuario no encontrado
                         Toast.makeText(
-                            this@TeamsActivity,
+                            this@GroupsActivity,
                             "No se encontró ningún usuario con ese correo.",
                             Toast.LENGTH_SHORT
                         ).show()
@@ -120,7 +120,7 @@ class TeamsActivity : AppCompatActivity() {
                 }
                 .addOnFailureListener { e ->
                     Toast.makeText(
-                        this@TeamsActivity,
+                        this@GroupsActivity,
                         "Error al buscar el usuario: ${e.message}",
                         Toast.LENGTH_SHORT
                     ).show()
@@ -152,17 +152,17 @@ class TeamsActivity : AppCompatActivity() {
                 if (snapshot.exists()) {
                     Log.d("TeamsActivity", "Key exists in database")
                     deviceId = snapshot.key
-                    Toast.makeText(this@TeamsActivity, "Key verificada. Tanque encontrado.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@GroupsActivity, "Key verificada. Tanque encontrado.", Toast.LENGTH_SHORT).show()
                 } else {
                     Log.d("TeamsActivity", "Key does not exist in database")
                     deviceId = null
-                    Toast.makeText(this@TeamsActivity, "Key no válida. No se encontró ningún dispositivo.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@GroupsActivity, "Key no válida. No se encontró ningún dispositivo.", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
                 Log.e("TeamsActivity", "Error: ${error.message}")
-                Toast.makeText(this@TeamsActivity, "Error al verificar la key: ${error.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@GroupsActivity, "Error al verificar la key: ${error.message}", Toast.LENGTH_SHORT).show()
             }
         })
 

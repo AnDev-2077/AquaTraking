@@ -1,11 +1,16 @@
 package com.devapps.aquatraking
 
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.PopupMenu
+import android.widget.Spinner
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.devapps.aquatraking.adapters.ViewPagerAdapter
@@ -13,6 +18,10 @@ import com.devapps.aquatraking.databinding.ActivityMainBinding
 import com.devapps.aquatraking.fragments.ChartsFragment
 import com.devapps.aquatraking.fragments.HomeFragment
 import com.devapps.aquatraking.fragments.SettingsFragment
+import com.devapps.aquatraking.services.ViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+
 
 enum class ProviderType{
     GOOGLE
@@ -22,6 +31,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: ViewPagerAdapter
+
+    private val tankViewModel: ViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +48,9 @@ class MainActivity : AppCompatActivity() {
         adapter.addFragment(HomeFragment(), "Inicio")
         adapter.addFragment(ChartsFragment(), "Consumo")
         adapter.addFragment(SettingsFragment(), "Configuración")
+
+        loadUserKeys()
+        setupKeySpinner()
 
         //Signing adapter to ViewPager
         binding.viewPager.adapter = adapter
@@ -104,5 +118,46 @@ class MainActivity : AppCompatActivity() {
             true
         }
         popupMenu.show()
+    }
+
+    private fun loadUserKeys() {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+
+        // Obtener módulos personales
+        FirebaseFirestore.getInstance().collection("users").document(user.uid)
+            .get()
+            .addOnSuccessListener { doc ->
+                val personalKeys = doc.get("modules") as? List<String> ?: emptyList()
+                Log.d("MainActivity", "Personal keys: $personalKeys")
+                // Obtener keys de grupos
+                FirebaseFirestore.getInstance().collection("groups")
+                    .whereArrayContains("members", user.email ?: "")
+                    .get()
+                    .addOnSuccessListener { querySnapshot ->
+                        val groupKeys = mutableListOf<String>()
+                        for (document in querySnapshot) {
+                            document.getString("deviceKey")?.let { groupKeys.add(it) }
+                        }
+                        Log.d("MainActivity", "Group keys: $groupKeys")
+                        val allKeys = (personalKeys + groupKeys).distinct()
+                        Log.d("MainActivity", "All keys: $allKeys")
+                        tankViewModel.setAvailableKeys(allKeys)
+                    }
+            }
+    }
+    private fun setupKeySpinner() {
+        val spinner = findViewById<Spinner>(R.id.spinnerKeys)
+        tankViewModel.availableKeys.observe(this) { keys ->
+            if (keys.isNotEmpty()) {
+                val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, keys)
+                spinner.adapter = adapter
+                spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                        tankViewModel.setSelectedKey(keys[position])
+                    }
+                    override fun onNothingSelected(parent: AdapterView<*>?) {}
+                }
+            }
+        }
     }
 }

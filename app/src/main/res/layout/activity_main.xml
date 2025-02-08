@@ -18,7 +18,15 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             app:menu="@menu/home_menu"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+            <Spinner
+                android:id="@+id/spinnerKeys"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"/>
+
+        </com.google.android.material.appbar.MaterialToolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
 
