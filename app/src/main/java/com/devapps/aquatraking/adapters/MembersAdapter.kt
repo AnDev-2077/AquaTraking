@@ -46,4 +46,8 @@ class MembersAdapter(
         membersList.add(newMember)
         notifyItemInserted(membersList.size - 1)
     }
+
+    fun getMembers(): List<String> {
+        return membersList.map { it.email }
+    }
 }

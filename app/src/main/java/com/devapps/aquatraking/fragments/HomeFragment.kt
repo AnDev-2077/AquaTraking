@@ -1,5 +1,6 @@
 package com.devapps.aquatraking.fragments
 
+import android.R
 import android.content.Intent
 import android.icu.util.Calendar
 import android.os.Bundle
@@ -8,14 +9,19 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import com.devapps.aquatraking.databinding.FragmentHomeBinding
 import com.devapps.aquatraking.services.ForegroundService
 import com.devapps.aquatraking.views.WaveLoadView
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -33,6 +39,10 @@ class HomeFragment : Fragment() {
     private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
     private var consumoListener: ChildEventListener? = null
+    private val userId = FirebaseAuth.getInstance().currentUser?.uid
+
+    private lateinit var spinnerModules: Spinner
+    private var modulesList: MutableList<String> = mutableListOf()
 
     private val maxDaysBack = 5
     private var currentOffset = 0
@@ -57,23 +67,28 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d("HomeFragment", "onViewCreated called")
 
+        spinnerModules = binding.spinnerModules
+
         val serviceIntent = Intent(requireContext(), ForegroundService::class.java)
         requireContext().startService(serviceIntent)
 
+        if (userId != null) {
+            Log.d("HomeFragment", "El usuario actual es: $userId")
+            getModulesForUser(userId)
+        } else {
+            Log.e("HomeFragment", "No se ha encontrado un usuario autenticado")
+            return
+        }
+
         waveView = binding.waveView
 
-        database = FirebaseDatabase.getInstance().reference
-
-        database = FirebaseDatabase.getInstance().getReference("/ModulesWifi/-O9AOGhgVPLt464eEULY")
+        database = FirebaseDatabase.getInstance().reference.child("ModulesWifi")
 
         binding.tvDate.text = dateFormat.format(currentDate.time)
 
         actualizarFechaDisplay()
 
         binding.btnPrevious.setOnClickListener{
-            /*currentDate.add(Calendar.DATE, -1)
-            rebootListener()
-            actualizarConsumoPorDia(dateFormat.format(currentDate.time))*/
             if (currentOffset < maxDaysBack) {
                 currentOffset++
                 actualizarFechaDisplay()
@@ -82,9 +97,6 @@ class HomeFragment : Fragment() {
         }
 
         binding.btnNext.setOnClickListener{
-            /*currentDate.add(Calendar.DATE, 1)
-            rebootListener()
-            actualizarConsumoPorDia(dateFormat.format(currentDate.time))*/
             if (currentOffset > 0) {
                 currentOffset--
                 actualizarFechaDisplay()
@@ -109,7 +121,6 @@ class HomeFragment : Fragment() {
             else -> SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(calendar.time)
         }
 
-        // Actualizar estado de los botones
         binding.btnPrevious.isEnabled = currentOffset < maxDaysBack
         binding.btnNext.isEnabled = currentOffset > 0
     }
@@ -157,6 +168,67 @@ class HomeFragment : Fragment() {
             Log.e("HomeFragment", "El porcentaje es nulo o no válido")
         }
     }
+
+    private fun getModulesForUser(userId: String) {
+        val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
+        userRef.get()
+            .addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    // Asumiendo que el campo "modules" es un array de strings.
+                    val modules = documentSnapshot.get("modules") as? List<String>
+                    if (modules != null && modules.isNotEmpty()) {
+                        for (module in modules) {
+                            Log.d("HomeFragment", "Módulo encontrado: $module")
+                            // Aquí puedes procesar el módulo, por ejemplo, agregarlo a una lista para el spinner:
+                            modulesList.add(module)
+                        }
+                        // Si necesitas mostrar el spinner con los módulos:
+                        setupSpinner()
+                    } else {
+                        Log.d("HomeFragment", "No se encontraron módulos para el usuario")
+                    }
+                } else {
+                    Log.d("HomeFragment", "El documento del usuario no existe")
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("HomeFragment", "Error al obtener el documento del usuario: ${exception.message}")
+            }
+    }
+
+    private fun setupSpinner() {
+        if (modulesList.size > 1) {
+            // Si hay más de un módulo, mostrar el Spinner
+            spinnerModules.visibility = View.VISIBLE
+            val adapter = ArrayAdapter(requireContext(), R.layout.simple_spinner_item, modulesList)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerModules.adapter = adapter
+
+            spinnerModules.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val selectedModule = modulesList[position]
+                    updateDatabaseReference(selectedModule)
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    // No hacer nada
+                }
+            }
+        } else if (modulesList.size == 1) {
+            // Si solo hay un módulo, seleccionarlo automáticamente
+            spinnerModules.visibility = View.GONE
+            updateDatabaseReference(modulesList[0])
+        }
+    }
+
+
+
+    private fun updateDatabaseReference(moduleId: String) {
+        database = FirebaseDatabase.getInstance().getReference("/ModulesWifi/$moduleId")
+        actualizarConsumoPorDia()
+    }
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()

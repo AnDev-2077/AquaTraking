@@ -101,7 +101,6 @@ class AuthActivity : AppCompatActivity() {
         val db = FirebaseFirestore.getInstance()
         val userRef = db.collection("users").document(uid)
 
-
         userRef.get().addOnSuccessListener { document ->
             if (!document.exists()) {
                 val userData = mapOf(
@@ -116,6 +115,7 @@ class AuthActivity : AppCompatActivity() {
                 userRef.set(userData)
                     .addOnSuccessListener {
                         Log.d("AuthActivity", "Usuario guardado en Firestore.")
+                        // Crear la subcolección después de confirmar que el usuario existe
                     }
                     .addOnFailureListener { e ->
                         Log.e("AuthActivity", "Error al guardar usuario: ${e.message}")
@@ -127,6 +127,7 @@ class AuthActivity : AppCompatActivity() {
             Log.e("AuthActivity", "Error al verificar usuario: ${e.message}")
         }
     }
+
 
     override fun onDestroy() {
         super.onDestroy()

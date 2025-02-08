@@ -66,53 +66,6 @@ class AddDeviceActivity : AppCompatActivity() {
         }
     }
 
-    /*private fun linkModuleToUser(userId: String, moduleKey: String) {
-        val firestore = FirebaseFirestore.getInstance()
-        val userDocRef = firestore.collection("users").document(userId)
-
-        userDocRef.get()
-            .addOnSuccessListener { documentSnapshot ->
-                if (documentSnapshot.exists()) {
-
-                    val userData = documentSnapshot.data
-                    val modules = userData?.get("modules") as? MutableList<String> ?: mutableListOf()
-
-                    if (modules.contains(moduleKey)) {
-                        Toast.makeText(this, "El módulo ya está vinculado a tu cuenta.", Toast.LENGTH_SHORT).show()
-                    } else {
-
-                        modules.add(moduleKey)
-
-                        userDocRef.update("modules", modules)
-                            .addOnSuccessListener {
-                                val sharedPreferences = getSharedPreferences("UserPreferences", MODE_PRIVATE)
-                                sharedPreferences.edit().putString("moduleKey", moduleKey).apply()
-                                Toast.makeText(this, "Módulo vinculado correctamente.", Toast.LENGTH_SHORT).show()
-                            }
-                            .addOnFailureListener {
-                                Toast.makeText(this, "Error al vincular el módulo: ${it.message}", Toast.LENGTH_SHORT).show()
-                            }
-                    }
-                } else {
-
-                    val userData = mapOf("modules" to listOf(moduleKey))
-                    userDocRef.set(userData)
-                        .addOnSuccessListener {
-                            val sharedPreferences = getSharedPreferences("UserPreferences", MODE_PRIVATE)
-                            sharedPreferences.edit().putString("moduleKey", moduleKey).apply()
-                            Toast.makeText(this, "Módulo vinculado correctamente.", Toast.LENGTH_SHORT).show()
-                        }
-                        .addOnFailureListener {
-                            Toast.makeText(this, "Error al crear el usuario: ${it.message}", Toast.LENGTH_SHORT).show()
-                        }
-                }
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Error al obtener el usuario: ${it.message}", Toast.LENGTH_SHORT).show()
-                Log.e("AddModuleByCodeActivity", "Error al obtener el usuario", it)
-            }
-    }*/
-
     private fun linkModuleToUser(userId: String, moduleKey: String) {
         val firestore = FirebaseFirestore.getInstance()
         val userDocRef = firestore.collection("users").document(userId)
@@ -164,12 +117,20 @@ class AddDeviceActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveModuleKeyLocally(moduleKey: String) {
+    /*private fun saveModuleKeyLocally(moduleKey: String) {
         val sharedPreferences = getSharedPreferences("UserPreferences", MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         editor.putString("moduleKey", moduleKey)
         editor.apply()
+    }*/
+
+    private fun saveModuleKeyLocally(moduleKey: String) {
+        val sharedPreferences = getSharedPreferences("UserPreferences", MODE_PRIVATE)
+        val keys = sharedPreferences.getStringSet("moduleKeys", mutableSetOf())?.toMutableSet() ?: mutableSetOf()
+        keys.add(moduleKey)
+        sharedPreferences.edit().putStringSet("moduleKeys", keys).apply()
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
