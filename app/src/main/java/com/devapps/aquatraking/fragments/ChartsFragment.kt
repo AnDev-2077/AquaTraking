@@ -26,6 +26,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -194,49 +195,70 @@ class ChartsFragment : Fragment() {
 
     private fun getEntriesForWeek(dataSnapshot: DataSnapshot, weekOffset: Int): List<Entry> {
         val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        // Opcional: asegurarse de usar la zona horaria del dispositivo
+        sdf.timeZone = Calendar.getInstance().timeZone
+
         val entries = mutableListOf<Entry>()
 
-        val calendarNow = Calendar.getInstance().apply {
-            firstDayOfWeek = Calendar.SUNDAY
-            add(Calendar.WEEK_OF_YEAR, -weekOffset) // Ajustar para semanas anteriores
-            set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+        // Inicio de semana: lunes a las 00:00:00.000
+        val startOfWeek = Calendar.getInstance().apply {
+            firstDayOfWeek = Calendar.MONDAY
+            add(Calendar.WEEK_OF_YEAR, -weekOffset)
+            set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
         }
 
-        val startOfWeek = calendarNow.clone() as Calendar
-        val endOfWeek = calendarNow.clone() as Calendar
-        endOfWeek.add(Calendar.DAY_OF_WEEK, 7)
+        // Fin de semana: domingo a las 23:59:59.999
+        val endOfWeek = (startOfWeek.clone() as Calendar).apply {
+            add(Calendar.DAY_OF_MONTH, 6)
+            set(Calendar.HOUR_OF_DAY, 23)
+            set(Calendar.MINUTE, 59)
+            set(Calendar.SECOND, 59)
+            set(Calendar.MILLISECOND, 999)
+        }
 
-        for (recordSnapshot in dataSnapshot.children) {
+        Log.d("ChartsFragment", "Rango de la semana: ${sdf.format(startOfWeek.time)} - ${sdf.format(endOfWeek.time)}")
+
+        dataSnapshot.children.forEach { recordSnapshot ->
             val fechaString = recordSnapshot.child("fecha").getValue(String::class.java)
             val porcentajeStr = recordSnapshot.child("porcentaje").getValue(String::class.java)
 
             if (!fechaString.isNullOrEmpty() && !porcentajeStr.isNullOrEmpty()) {
                 try {
-                    val date = sdf.parse(fechaString)
-                    val recordCalendar = Calendar.getInstance().apply { time = date }
+                    val fecha = sdf.parse(fechaString)
+                    val calendarFecha = Calendar.getInstance().apply {
+                        time = fecha
+                        set(Calendar.MILLISECOND, 0)
+                    }
 
-                    if (!recordCalendar.before(startOfWeek) && !recordCalendar.after(endOfWeek)) {
-                        val xValue = when (recordCalendar.get(Calendar.DAY_OF_WEEK)) {
-                            Calendar.MONDAY -> 0f
-                            Calendar.TUESDAY -> 1f
-                            Calendar.WEDNESDAY -> 2f
-                            Calendar.THURSDAY -> 3f
-                            Calendar.FRIDAY -> 4f
-                            Calendar.SATURDAY -> 5f
-                            Calendar.SUNDAY -> 6f
-                            else -> 0f
+                    // Verificar si la fecha está dentro del rango
+                    if (!calendarFecha.before(startOfWeek) && !calendarFecha.after(endOfWeek)) {
+                        val xValue = when (calendarFecha.get(Calendar.DAY_OF_WEEK)) {
+                            Calendar.MONDAY -> 0f    // Lunes
+                            Calendar.TUESDAY -> 1f   // Martes
+                            Calendar.WEDNESDAY -> 2f // Miércoles
+                            Calendar.THURSDAY -> 3f  // Jueves
+                            Calendar.FRIDAY -> 4f    // Viernes
+                            Calendar.SATURDAY -> 5f  // Sábado
+                            Calendar.SUNDAY -> 6f    // Domingo
+                            else -> -1f
                         }
                         val porcentaje = porcentajeStr.toFloatOrNull() ?: 0f
                         entries.add(Entry(xValue, porcentaje))
+                        Log.d("ChartsFragment", "Agregado -> Fecha: $fechaString, Día: ${calendarFecha.get(Calendar.DAY_OF_WEEK)}, xValue: $xValue, Porcentaje: $porcentaje")
                     }
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Log.e("ChartsFragment", "Error al parsear fecha: ${e.message}")
                 }
             }
         }
 
-        return (0..6).map { x ->
-            entries.firstOrNull { it.x == x.toFloat() } ?: Entry(x.toFloat(), 0f)
+        // Rellenar días faltantes con 0
+        return (0..6).map { day ->
+            entries.firstOrNull { it.x == day.toFloat() } ?: Entry(day.toFloat(), 0f)
         }.sortedBy { it.x }
     }
 
