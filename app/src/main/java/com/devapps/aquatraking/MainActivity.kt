@@ -120,8 +120,10 @@ class MainActivity : AppCompatActivity() {
         popupMenu.show()
     }
 
-    private fun loadUserKeys() {
+    /*private fun loadUserKeys() {
         val user = FirebaseAuth.getInstance().currentUser ?: return
+        val userEmail = user.email ?: return
+        Log.d("MainActivity", "User email: $userEmail")
 
         // Obtener módulos personales
         FirebaseFirestore.getInstance().collection("users").document(user.uid)
@@ -131,12 +133,16 @@ class MainActivity : AppCompatActivity() {
                 Log.d("MainActivity", "Personal keys: $personalKeys")
                 // Obtener keys de grupos
                 FirebaseFirestore.getInstance().collection("groups")
-                    .whereArrayContains("members", user.email ?: "")
+                    .whereArrayContains("members", userEmail)
                     .get()
                     .addOnSuccessListener { querySnapshot ->
                         val groupKeys = mutableListOf<String>()
                         for (document in querySnapshot) {
-                            document.getString("deviceKey")?.let { groupKeys.add(it) }
+                            val deviceKey = document.getString("deviceKey") ?: ""
+                            if(deviceKey.isNotEmpty()){
+                                groupKeys.add(deviceKey)
+                                Log.d("MainActivity", "Grupo encontrado: ${document.id} - DeviceKey: $deviceKey")
+                            }
                         }
                         Log.d("MainActivity", "Group keys: $groupKeys")
                         val allKeys = (personalKeys + groupKeys).distinct()
@@ -144,7 +150,49 @@ class MainActivity : AppCompatActivity() {
                         tankViewModel.setAvailableKeys(allKeys)
                     }
             }
+    }*/
+
+    private fun loadUserKeys() {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+        val userEmail = user.email ?: return
+        Log.d("MainActivity", "User email: $userEmail")
+
+        // 1. Obtener módulos personales
+        FirebaseFirestore.getInstance().collection("users").document(user.uid)
+            .get()
+            .addOnSuccessListener { doc ->
+                val personalKeys = doc.get("modules") as? List<String> ?: emptyList()
+                Log.d("MainActivity", "Personal keys: $personalKeys")
+
+                // 2. Obtener keys de grupos
+                FirebaseFirestore.getInstance().collection("groups")
+                    .whereArrayContains("members", userEmail) // Buscar por email
+                    .get()
+                    .addOnSuccessListener { querySnapshot ->
+                        val groupKeys = mutableListOf<String>()
+                        for (document in querySnapshot) {
+                            val deviceKey = document.getString("deviceKey") ?: ""
+                            if (deviceKey.isNotEmpty()) {
+                                groupKeys.add(deviceKey)
+                                Log.d("MainActivity", "Grupo encontrado: ${document.id} - deviceKey: $deviceKey")
+                            }
+                        }
+                        Log.d("MainActivity", "Group keys: $groupKeys")
+
+                        // 3. Combinar y eliminar duplicados
+                        val allKeys = (personalKeys + groupKeys).distinct()
+                        Log.d("MainActivity", "All keys: $allKeys")
+                        tankViewModel.setAvailableKeys(allKeys)
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("MainActivity", "Error al cargar grupos: ${e.message}")
+                    }
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainActivity", "Error al cargar módulos: ${e.message}")
+            }
     }
+
     private fun setupKeySpinner() {
         val spinner = findViewById<Spinner>(R.id.spinnerKeys)
         tankViewModel.availableKeys.observe(this) { keys ->
