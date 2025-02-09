@@ -12,8 +12,10 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import androidx.fragment.app.activityViewModels
 import com.devapps.aquatraking.databinding.FragmentHomeBinding
 import com.devapps.aquatraking.services.ForegroundService
+import com.devapps.aquatraking.services.ViewModel
 import com.devapps.aquatraking.views.WaveLoadView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ChildEventListener
@@ -21,6 +23,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -31,6 +34,8 @@ private const val ARG_PARAM2 = "param2"
 class HomeFragment : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
+
+    private val tankViewModel: ViewModel by activityViewModels()
 
     private lateinit var binding: FragmentHomeBinding
     private var waveView: WaveLoadView? = null
@@ -43,6 +48,8 @@ class HomeFragment : Fragment() {
 
     private lateinit var spinnerModules: Spinner
     private var modulesList: MutableList<String> = mutableListOf()
+
+
 
     private val maxDaysBack = 5
     private var currentOffset = 0
@@ -68,6 +75,10 @@ class HomeFragment : Fragment() {
         Log.d("HomeFragment", "onViewCreated called")
 
         spinnerModules = binding.spinnerModules
+
+        tankViewModel.selectedKey.observe(viewLifecycleOwner) { key ->
+            key?.let { loadTankData(it) } ?: showDefaultData()
+        }
 
         val serviceIntent = Intent(requireContext(), ForegroundService::class.java)
         requireContext().startService(serviceIntent)
@@ -108,6 +119,20 @@ class HomeFragment : Fragment() {
 
     private fun rebootListener() {
         consumoListener?.let { database.removeEventListener(it) }
+    }
+
+    private fun loadTankData(key: String) {
+        val ref = FirebaseDatabase.getInstance().getReference("ModulesWifi/$key")
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                // Actualizar UI con datos reales
+            }
+            override fun onCancelled(error: DatabaseError) {}
+        })
+    }
+
+    private fun showDefaultData() {
+        waveView?.setProgress(0f)
     }
 
     private fun actualizarFechaDisplay() {

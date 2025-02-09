@@ -11,9 +11,11 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.activityViewModels
 import com.devapps.aquatraking.views.CustomMarkerView
 import com.devapps.aquatraking.R
 import com.devapps.aquatraking.databinding.FragmentChartsBinding
+import com.devapps.aquatraking.services.ViewModel
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
@@ -24,7 +26,6 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -32,11 +33,9 @@ import java.util.Locale
 class ChartsFragment : Fragment() {
 
     private lateinit var binding: FragmentChartsBinding
-    private lateinit var spinnerModules: Spinner
-    private var modulesList: MutableList<String> = mutableListOf()
-    private lateinit var database: FirebaseDatabase
     private var currentWeekOffset = 0 // Semana actual por defecto
-    private val userId = FirebaseAuth.getInstance().currentUser?.uid
+
+    private val tankViewModel: ViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,29 +48,26 @@ class ChartsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        spinnerModules = binding.spinnerModules
-
-        if (userId != null) {
-            Log.d("ChartsFragment", "El usuario actual es: $userId")
-            getModulesForUser(userId)
-        } else {
-            Log.e("ChartsFragment", "No se ha encontrado un usuario autenticado")
-            return
+        tankViewModel.selectedKey.observe(viewLifecycleOwner) { key ->
+            key?.let { loadChartData(it, currentWeekOffset) } ?: showDefaultValues()
         }
 
-        // Configurar listeners de los botones
+        setupWeekNavigation()
+    }
+
+    private fun setupWeekNavigation() {
         binding.btnNextWeek.setOnClickListener {
-            if (currentWeekOffset > 0) { // No permitir valores negativos
+            if (currentWeekOffset > 0) {
                 currentWeekOffset--
-                actualizarGraficoConSemana(currentWeekOffset)
+                updateChartForCurrentKey()
                 updateWeekDisplay()
             }
         }
 
         binding.btnPreviousWeek.setOnClickListener {
-            if (currentWeekOffset < 4) { // Limitar el retroceso a 4 semanas
+            if (currentWeekOffset < 4) {
                 currentWeekOffset++
-                actualizarGraficoConSemana(currentWeekOffset)
+                updateChartForCurrentKey()
                 updateWeekDisplay()
             }
         }
@@ -79,74 +75,30 @@ class ChartsFragment : Fragment() {
         updateWeekDisplay()
     }
 
-    private fun getModulesForUser(userId: String) {
-        val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
-        userRef.get()
-            .addOnSuccessListener { documentSnapshot ->
-                if (documentSnapshot.exists()) {
-                    val modules = documentSnapshot.get("modules") as? List<String>
-                    if (modules != null && modules.isNotEmpty()) {
-                        modulesList.addAll(modules)
-                        setupSpinner()
-                    } else {
-                        Log.d("ChartsFragment", "No se encontraron módulos para el usuario")
-                    }
+    private fun updateChartForCurrentKey() {
+        tankViewModel.selectedKey.value?.let { key ->
+            loadChartData(key, currentWeekOffset)
+        } ?: showDefaultValues()
+    }
+
+    private fun loadChartData(key: String, weekOffset: Int) {
+        val ref = FirebaseDatabase.getInstance().getReference("ModulesWifi/$key")
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val entries = getEntriesForWeek(dataSnapshot, weekOffset)
+                if (entries.isNotEmpty()) {
+                    val dataSet = crearDataSet(entries, "Porcentaje")
+                    binding.lineChart.data = LineData(dataSet)
+                    binding.lineChart.invalidate()
                 } else {
-                    Log.d("ChartsFragment", "El documento del usuario no existe")
+                    showDefaultValues()
                 }
             }
-            .addOnFailureListener { exception ->
-                Log.e("ChartsFragment", "Error al obtener el documento del usuario: ${exception.message}")
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                Log.e("ChartsFragment", "Error al leer datos: ${databaseError.message}")
             }
-    }
-
-    private fun setupSpinner() {
-        if (modulesList.size > 1) {
-            spinnerModules.visibility = View.VISIBLE
-            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, modulesList)
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinnerModules.adapter = adapter
-
-            spinnerModules.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    val selectedModule = modulesList[position]
-                    updateDatabaseReference(selectedModule)
-                }
-
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-                }
-            }
-        } else if (modulesList.size == 1) {
-            spinnerModules.visibility = View.GONE
-            updateDatabaseReference(modulesList[0])
-        }
-    }
-
-    private fun updateDatabaseReference(moduleId: String) {
-        database = FirebaseDatabase.getInstance()
-        actualizarGraficoConSemana(currentWeekOffset)
-    }
-
-    private fun actualizarGraficoConSemana(weekOffset: Int) {
-        if (modulesList.isNotEmpty()) {
-            val ref = database.getReference("ModulesWifi").child(modulesList[0])
-            ref.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val entries = getEntriesForWeek(dataSnapshot, weekOffset)
-                    if (entries.isNotEmpty()) {
-                        val dataSet = crearDataSet(entries, "Porcentaje")
-                        binding.lineChart.data = LineData(dataSet)
-                        binding.lineChart.invalidate()
-                    } else {
-                        showDefaultValues()
-                    }
-                }
-
-                override fun onCancelled(databaseError: DatabaseError) {
-                    Log.e("ChartsFragment", "Error al leer datos: ${databaseError.message}")
-                }
-            })
-        }
+        })
     }
 
     private fun updateWeekDisplay() {

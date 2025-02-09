@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.material.v140)
     implementation(libs.mpandroidchart)
     implementation(libs.androidx.runtime.android)
+    implementation(libs.androidx.fragment.ktx)
 
     implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
     implementation("com.google.firebase:firebase-firestore")
@@ -59,6 +60,7 @@ dependencies {
     implementation("com.firebaseui:firebase-ui-auth:7.2.0")
     implementation("com.squareup.picasso:picasso:2.8")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
