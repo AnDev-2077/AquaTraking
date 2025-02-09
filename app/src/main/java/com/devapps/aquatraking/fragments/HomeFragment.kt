@@ -61,24 +61,19 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d("HomeFragment", "onViewCreated called")
-
         // Observar cambios en la key seleccionada
         tankViewModel.selectedKey.observe(viewLifecycleOwner) { key ->
             key?.let { loadTankData(it) } ?: showDefaultData()
         }
-
         // Iniciar el servicio en primer plano
         val serviceIntent = Intent(requireContext(), ForegroundService::class.java)
         requireContext().startService(serviceIntent)
-
         // Inicializar vistas y listeners
         waveView = binding.waveView
         database = FirebaseDatabase.getInstance().reference.child("ModulesWifi")
-
         // Mostrar fecha actual
         binding.tvDate.text = dateFormat.format(currentDate.time)
         actualizarFechaDisplay()
-
         // Configurar listeners de los botones
         binding.btnPrevious.setOnClickListener {
             if (currentOffset < maxDaysBack) {
@@ -87,7 +82,6 @@ class HomeFragment : Fragment() {
                 actualizarConsumoPorDia()
             }
         }
-
         binding.btnNext.setOnClickListener {
             if (currentOffset > 0) {
                 currentOffset--
@@ -95,7 +89,6 @@ class HomeFragment : Fragment() {
                 actualizarConsumoPorDia()
             }
         }
-
         // Cargar datos iniciales
         actualizarConsumoPorDia()
     }
@@ -145,30 +138,27 @@ class HomeFragment : Fragment() {
     }
 
     private fun actualizarConsumoPorDia() {
-        rebootListener()
-
         val targetDate = Calendar.getInstance().apply {
             add(Calendar.DATE, -currentOffset)
         }
         val fechaFormateada = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(targetDate.time)
 
-        // Se crea una query para filtrar por el campo "fecha"
-        val query = database.orderByChild("fecha").equalTo(fechaFormateada)
-        consumoListener = query.addChildEventListener(object : ChildEventListener {
-            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-                updateWaveView(snapshot)
-            }
-
-            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-                updateWaveView(snapshot)
-            }
-
-            override fun onChildRemoved(snapshot: DataSnapshot) {
-                // Puedes implementar lógica si se elimina un registro
-            }
-
-            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
-                // No es necesario para este caso
+        // Obtener la referencia correcta
+        val ref = FirebaseDatabase.getInstance().getReference("ModulesWifi/${tankViewModel.selectedKey.value}")
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    for (childSnapshot in snapshot.children) {
+                        val fecha = childSnapshot.child("fecha").getValue(String::class.java)
+                        if (fecha == fechaFormateada) {
+                            updateWaveView(childSnapshot)
+                            return // Salir después de encontrar la fecha correcta
+                        }
+                    }
+                    Log.e("HomeFragment", "No se encontraron datos para la fecha: $fechaFormateada")
+                } else {
+                    Log.e("HomeFragment", "No se encontraron datos para la clave: ${tankViewModel.selectedKey.value}")
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -178,6 +168,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateWaveView(snapshot: DataSnapshot) {
+
         val porcentaje = snapshot.child("porcentaje").getValue(String::class.java)?.toFloatOrNull()
         if (porcentaje != null) {
             waveView?.setProgress(porcentaje)

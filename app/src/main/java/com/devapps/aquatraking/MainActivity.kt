@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity() {
         popupMenu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.addDevice -> Toast.makeText(this, "Añadir dispositivo", Toast.LENGTH_SHORT).show()
-                R.id.scanDevice -> Toast.makeText(this, "Nueva difusión", Toast.LENGTH_SHORT).show()
+                R.id.scanDevice -> Toast.makeText(this, "Escanear", Toast.LENGTH_SHORT).show()
             }
             true
         }
