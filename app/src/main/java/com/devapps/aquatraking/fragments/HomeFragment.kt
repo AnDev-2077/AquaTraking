@@ -1,6 +1,5 @@
 package com.devapps.aquatraking.fragments
 
-import android.R
 import android.content.Intent
 import android.icu.util.Calendar
 import android.os.Bundle
@@ -9,22 +8,17 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Spinner
 import androidx.fragment.app.activityViewModels
 import com.devapps.aquatraking.databinding.FragmentHomeBinding
 import com.devapps.aquatraking.services.ForegroundService
 import com.devapps.aquatraking.services.ViewModel
 import com.devapps.aquatraking.views.WaveLoadView
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -35,7 +29,7 @@ class HomeFragment : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
 
-    private val tankViewModel: ViewModel by activityViewModels()
+    private val tankViewModel: ViewModel by activityViewModels() // ViewModel compartido
 
     private lateinit var binding: FragmentHomeBinding
     private var waveView: WaveLoadView? = null
@@ -44,12 +38,6 @@ class HomeFragment : Fragment() {
     private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
     private var consumoListener: ChildEventListener? = null
-    private val userId = FirebaseAuth.getInstance().currentUser?.uid
-
-    private lateinit var spinnerModules: Spinner
-    private var modulesList: MutableList<String> = mutableListOf()
-
-
 
     private val maxDaysBack = 5
     private var currentOffset = 0
@@ -74,32 +62,25 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d("HomeFragment", "onViewCreated called")
 
-        spinnerModules = binding.spinnerModules
-
+        // Observar cambios en la key seleccionada
         tankViewModel.selectedKey.observe(viewLifecycleOwner) { key ->
             key?.let { loadTankData(it) } ?: showDefaultData()
         }
 
+        // Iniciar el servicio en primer plano
         val serviceIntent = Intent(requireContext(), ForegroundService::class.java)
         requireContext().startService(serviceIntent)
 
-        if (userId != null) {
-            Log.d("HomeFragment", "El usuario actual es: $userId")
-            getModulesForUser(userId)
-        } else {
-            Log.e("HomeFragment", "No se ha encontrado un usuario autenticado")
-            return
-        }
-
+        // Inicializar vistas y listeners
         waveView = binding.waveView
-
         database = FirebaseDatabase.getInstance().reference.child("ModulesWifi")
 
+        // Mostrar fecha actual
         binding.tvDate.text = dateFormat.format(currentDate.time)
-
         actualizarFechaDisplay()
 
-        binding.btnPrevious.setOnClickListener{
+        // Configurar listeners de los botones
+        binding.btnPrevious.setOnClickListener {
             if (currentOffset < maxDaysBack) {
                 currentOffset++
                 actualizarFechaDisplay()
@@ -107,13 +88,15 @@ class HomeFragment : Fragment() {
             }
         }
 
-        binding.btnNext.setOnClickListener{
+        binding.btnNext.setOnClickListener {
             if (currentOffset > 0) {
                 currentOffset--
                 actualizarFechaDisplay()
                 actualizarConsumoPorDia()
             }
         }
+
+        // Cargar datos iniciales
         actualizarConsumoPorDia()
     }
 
@@ -125,9 +108,20 @@ class HomeFragment : Fragment() {
         val ref = FirebaseDatabase.getInstance().getReference("ModulesWifi/$key")
         ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                // Actualizar UI con datos reales
+                if (snapshot.exists()) {
+                    for (childSnapshot in snapshot.children) {
+                        val fecha = childSnapshot.child("fecha").getValue(String::class.java)
+                        val porcentaje = childSnapshot.child("porcentaje").getValue(String::class.java)
+                        Log.d("HomeFragment", "Fecha: $fecha, Porcentaje: $porcentaje")
+                        updateWaveView(childSnapshot)
+                    }
+                } else {
+                    Log.e("HomeFragment", "No se encontraron datos para la clave: $key")
+                }
             }
-            override fun onCancelled(error: DatabaseError) {}
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("HomeFragment", "Error al leer datos: ${error.message}")
+            }
         })
     }
 
@@ -151,7 +145,6 @@ class HomeFragment : Fragment() {
     }
 
     private fun actualizarConsumoPorDia() {
-
         rebootListener()
 
         val targetDate = Calendar.getInstance().apply {
@@ -194,72 +187,10 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun getModulesForUser(userId: String) {
-        val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
-        userRef.get()
-            .addOnSuccessListener { documentSnapshot ->
-                if (documentSnapshot.exists()) {
-                    // Asumiendo que el campo "modules" es un array de strings.
-                    val modules = documentSnapshot.get("modules") as? List<String>
-                    if (modules != null && modules.isNotEmpty()) {
-                        for (module in modules) {
-                            Log.d("HomeFragment", "Módulo encontrado: $module")
-                            // Aquí puedes procesar el módulo, por ejemplo, agregarlo a una lista para el spinner:
-                            modulesList.add(module)
-                        }
-                        // Si necesitas mostrar el spinner con los módulos:
-                        setupSpinner()
-                    } else {
-                        Log.d("HomeFragment", "No se encontraron módulos para el usuario")
-                    }
-                } else {
-                    Log.d("HomeFragment", "El documento del usuario no existe")
-                }
-            }
-            .addOnFailureListener { exception ->
-                Log.e("HomeFragment", "Error al obtener el documento del usuario: ${exception.message}")
-            }
-    }
-
-    private fun setupSpinner() {
-        if (modulesList.size > 1) {
-            // Si hay más de un módulo, mostrar el Spinner
-            spinnerModules.visibility = View.VISIBLE
-            val adapter = ArrayAdapter(requireContext(), R.layout.simple_spinner_item, modulesList)
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinnerModules.adapter = adapter
-
-            spinnerModules.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    val selectedModule = modulesList[position]
-                    updateDatabaseReference(selectedModule)
-                }
-
-                override fun onNothingSelected(parent: AdapterView<*>?) {
-                    // No hacer nada
-                }
-            }
-        } else if (modulesList.size == 1) {
-            // Si solo hay un módulo, seleccionarlo automáticamente
-            spinnerModules.visibility = View.GONE
-            updateDatabaseReference(modulesList[0])
-        }
-    }
-
-
-
-    private fun updateDatabaseReference(moduleId: String) {
-        database = FirebaseDatabase.getInstance().getReference("/ModulesWifi/$moduleId")
-        actualizarConsumoPorDia()
-    }
-
-
-
     override fun onDestroyView() {
         super.onDestroyView()
         rebootListener()
     }
-
 
     companion object {
         @JvmStatic
