@@ -7,9 +7,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Spinner
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import com.devapps.aquatraking.views.CustomMarkerView
@@ -21,12 +18,10 @@ import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -34,7 +29,7 @@ import java.util.Locale
 class ChartsFragment : Fragment() {
 
     private lateinit var binding: FragmentChartsBinding
-    private var currentWeekOffset = 0 // Semana actual por defecto
+    private var currentWeekOffset = 0
 
     private val tankViewModel: ViewModel by activityViewModels()
 
@@ -237,13 +232,13 @@ class ChartsFragment : Fragment() {
                     // Verificar si la fecha está dentro del rango
                     if (!calendarFecha.before(startOfWeek) && !calendarFecha.after(endOfWeek)) {
                         val xValue = when (calendarFecha.get(Calendar.DAY_OF_WEEK)) {
-                            Calendar.MONDAY -> 0f    // Lunes
-                            Calendar.TUESDAY -> 1f   // Martes
-                            Calendar.WEDNESDAY -> 2f // Miércoles
-                            Calendar.THURSDAY -> 3f  // Jueves
-                            Calendar.FRIDAY -> 4f    // Viernes
-                            Calendar.SATURDAY -> 5f  // Sábado
-                            Calendar.SUNDAY -> 6f    // Domingo
+                            Calendar.MONDAY -> 0f
+                            Calendar.TUESDAY -> 1f
+                            Calendar.WEDNESDAY -> 2f
+                            Calendar.THURSDAY -> 3f
+                            Calendar.FRIDAY -> 4f
+                            Calendar.SATURDAY -> 5f
+                            Calendar.SUNDAY -> 6f
                             else -> -1f
                         }
                         val porcentaje = porcentajeStr.toFloatOrNull() ?: 0f

@@ -23,17 +23,32 @@ class ForegroundService : Service() {
 
     }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val prefs = getSharedPreferences("NotificationPrefs", MODE_PRIVATE)
+        // Umbral para nivel bajo (llOption1)
+        val lowThreshold = prefs.getFloat("notification_threshold", 25f)
+        // Umbral para nivel crítico (llOption2)
+        val criticalThreshold = prefs.getFloat("notification_critical_threshold", 10f)
+
         val porcentaje = intent?.getFloatExtra("porcentaje", restoreState()) ?: restoreState()
 
         if (porcentaje != -1f) {
             saveState(porcentaje)
-            when {
-                porcentaje >= 100 -> sendNotification("Tanque lleno", "El tanque está lleno al 100%.")
-                porcentaje <= 25 && porcentaje > 10 -> sendNotification("Nivel bajo", "El nivel de agua es bajo: $porcentaje%.")
-                porcentaje <= 10 -> sendNotification("Nivel crítico", "¡Nivel crítico de agua! Solo queda el $porcentaje%.")
+            if (areNotificationsEnabled()){
+                when {
+                    porcentaje >= 100 -> sendNotification("Tanque lleno", "El tanque está lleno al 100%.")
+                    porcentaje <= lowThreshold && porcentaje > criticalThreshold ->
+                        sendNotification("Nivel bajo", "El nivel de agua es bajo: $porcentaje%.")
+                    porcentaje <= criticalThreshold ->
+                        sendNotification("Nivel crítico", "¡Nivel crítico de agua! Solo queda el $porcentaje%.")
+                }
             }
         }
         return START_STICKY
+    }
+
+    private fun areNotificationsEnabled(): Boolean {
+        val sharedPreferences = getSharedPreferences("NotificationPrefs", MODE_PRIVATE)
+        return sharedPreferences.getBoolean("notifications_enabled", true)
     }
 
     private fun createNotificationChannel() {

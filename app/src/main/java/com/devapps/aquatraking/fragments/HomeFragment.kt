@@ -97,7 +97,7 @@ class HomeFragment : Fragment() {
         consumoListener?.let { database.removeEventListener(it) }
     }
 
-    private fun loadTankData(key: String) {
+    /*private fun loadTankData(key: String) {
         val ref = FirebaseDatabase.getInstance().getReference("ModulesWifi/$key")
         ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -116,7 +116,39 @@ class HomeFragment : Fragment() {
                 Log.e("HomeFragment", "Error al leer datos: ${error.message}")
             }
         })
+    }*/
+
+    private fun loadTankData(key: String) {
+        val ref = FirebaseDatabase.getInstance().getReference("ModulesWifi/$key")
+
+        ref.addChildEventListener(object : ChildEventListener {
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                actualizarDatos(snapshot)
+            }
+
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                actualizarDatos(snapshot)
+            }
+
+            override fun onChildRemoved(snapshot: DataSnapshot) {
+                Log.d("HomeFragment", "Dato eliminado: ${snapshot.key}")
+            }
+
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("HomeFragment", "Error al leer datos: ${error.message}")
+            }
+        })
     }
+
+    private fun actualizarDatos(snapshot: DataSnapshot) {
+        val fecha = snapshot.child("fecha").getValue(String::class.java)
+        val porcentaje = snapshot.child("porcentaje").getValue(String::class.java)
+        Log.d("HomeFragment", "Fecha: $fecha, Porcentaje: $porcentaje")
+        updateWaveView(snapshot)
+    }
+
 
     private fun showDefaultData() {
         waveView?.setProgress(0f)
@@ -156,8 +188,10 @@ class HomeFragment : Fragment() {
                         }
                     }
                     Log.e("HomeFragment", "No se encontraron datos para la fecha: $fechaFormateada")
+                    showDefaultData()
                 } else {
                     Log.e("HomeFragment", "No se encontraron datos para la clave: ${tankViewModel.selectedKey.value}")
+                    showDefaultData()
                 }
             }
 
@@ -168,13 +202,24 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateWaveView(snapshot: DataSnapshot) {
-
         val porcentaje = snapshot.child("porcentaje").getValue(String::class.java)?.toFloatOrNull()
-        if (porcentaje != null) {
+        val fecha = snapshot.child("fecha").getValue(String::class.java)
+        if (porcentaje != null && fecha != null) {
             waveView?.setProgress(porcentaje)
             Log.d("HomeFragment", "Porcentaje actualizado: $porcentaje% para la fecha: ${snapshot.child("fecha").value}")
+            sendPercentageToService(porcentaje, fecha)
         } else {
             Log.e("HomeFragment", "El porcentaje es nulo o no válido")
+        }
+    }
+
+    private fun sendPercentageToService(porcentaje: Float, fecha: String) {
+        val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Calendar.getInstance().time)
+        if (fecha == currentDate) {
+            val serviceIntent = Intent(requireContext(), ForegroundService::class.java).apply {
+                putExtra("porcentaje", porcentaje)
+            }
+            requireContext().startService(serviceIntent)
         }
     }
 

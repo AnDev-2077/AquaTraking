@@ -55,6 +55,10 @@ class SettingsFragment : Fragment() {
             logoutConfirmationDialog()
         }
 
+        binding.llOption6.setOnClickListener{
+            //No menu
+        }
+
         binding.llOption1.setOnClickListener{
             val intent = Intent(activity, NotificationsMenuActivity::class.java)
             startActivity(intent)
@@ -80,9 +84,7 @@ class SettingsFragment : Fragment() {
             startActivity(intent)
         }
 
-        binding.llOption6.setOnClickListener{
-            //No menu
-        }
+
     }
 
     private fun logoutConfirmationDialog(){
