@@ -11,7 +11,7 @@ import com.devapps.aquatraking.activities.AuthActivity
 import com.devapps.aquatraking.activities.GroupsMenuActivity
 import com.devapps.aquatraking.activities.DevicesActivity
 import com.devapps.aquatraking.activities.NotificationsMenuActivity
-import com.devapps.aquatraking.activities.StorageMenuActivity
+import com.devapps.aquatraking.activities.StorageActivity
 import com.devapps.aquatraking.activities.ThemesMenuActivity
 import com.devapps.aquatraking.databinding.FragmentSettingsBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -65,7 +65,7 @@ class SettingsFragment : Fragment() {
         }
 
         binding.llOption2.setOnClickListener{
-            val intent = Intent(activity, StorageMenuActivity::class.java)
+            val intent = Intent(activity, StorageActivity::class.java)
             startActivity(intent)
         }
 

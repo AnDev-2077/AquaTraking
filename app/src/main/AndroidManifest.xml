@@ -42,7 +42,7 @@
             android:name=".activities.GroupsMenuActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.StorageMenuActivity"
+            android:name=".activities.StorageActivity"
             android:exported="false" />
         <activity
             android:name=".activities.GroupsActivity"
