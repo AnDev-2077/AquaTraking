@@ -4,7 +4,10 @@
     android:layout_height="wrap_content"
     android:paddingBottom="6dp"
     android:paddingTop="6dp"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?android:attr/selectableItemBackground">
 
     <TextView
         android:id="@+id/tvReportName"
@@ -13,7 +16,7 @@
         android:text="Nombre del archivo"
         android:textColor="@android:color/black"
         android:textSize="16sp"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="24dp"
         app:layout_constraintStart_toEndOf="@+id/icon"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -24,7 +27,7 @@
         android:text="Creado 00 de mes. de 2025"
         android:textColor="@android:color/black"
         android:textSize="12sp"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/icon"
@@ -34,14 +37,26 @@
         android:id="@+id/icon"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:background="@drawable/circle_shape"
-        android:clipToOutline="true"
-        android:scaleType="centerCrop"
         android:src="@drawable/ic_pdf"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginStart="16dp"
         app:tint="@color/red1" />
+
+
+    <ImageView
+        android:id="@+id/btMore"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/ic_more"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="20dp"
+        app:tint="@color/gray2"
+        android:background="@drawable/bt_rounded_background"/>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

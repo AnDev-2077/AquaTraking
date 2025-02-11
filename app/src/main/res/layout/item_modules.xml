@@ -13,7 +13,7 @@
         android:text="Id del dispositivo"
         android:textColor="@android:color/black"
         android:textSize="16sp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/icon"
         app:layout_constraintTop_toTopOf="parent" />
@@ -22,14 +22,11 @@
         android:id="@+id/icon"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:background="@drawable/circle_shape"
-        android:clipToOutline="true"
-        android:scaleType="centerCrop"
         android:src="@drawable/ic_module"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="24dp"
         app:tint="@color/gray2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
