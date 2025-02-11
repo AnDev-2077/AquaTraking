@@ -7,16 +7,28 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <TextView
-        android:id="@+id/tvKeyModule"
+        android:id="@+id/tvReportName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Id del dispositivo"
+        android:text="Nombre del archivo"
         android:textColor="@android:color/black"
         android:textSize="16sp"
-        android:layout_marginStart="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginStart="12dp"
         app:layout_constraintStart_toEndOf="@+id/icon"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvCreationDate"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Creado 00 de mes. de 2025"
+        android:textColor="@android:color/black"
+        android:textSize="12sp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/icon"
+        app:layout_constraintTop_toBottomOf="@+id/tvReportName" />
 
     <ImageView
         android:id="@+id/icon"
@@ -25,11 +37,11 @@
         android:background="@drawable/circle_shape"
         android:clipToOutline="true"
         android:scaleType="centerCrop"
-        android:src="@drawable/ic_module"
+        android:src="@drawable/ic_pdf"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginStart="16dp"
-        app:tint="@color/gray2" />
+        app:tint="@color/red1" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
