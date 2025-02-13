@@ -43,7 +43,9 @@
         android:layout_height="wrap_content"
         app:labelVisibilityMode="auto"
         app:menu="@menu/bottom_nav_menu"
-        android:layout_gravity="bottom"/>
+        android:layout_gravity="bottom"
+        app:itemIconTint="@color/bottom_nav_selector"
+        app:itemActiveIndicatorStyle="@style/App.Custom.Indicator"/>
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

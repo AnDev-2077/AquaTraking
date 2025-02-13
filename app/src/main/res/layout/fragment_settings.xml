@@ -110,7 +110,8 @@
                 <ImageView
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:src="@drawable/ic_notifications" />
+                    android:src="@drawable/ic_notifications"
+                    app:tint="@color/icon_primary" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -134,7 +135,8 @@
                 <ImageView
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:src="@drawable/ic_donut" />
+                    android:src="@drawable/ic_donut"
+                    app:tint="@color/icon_primary" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -159,7 +161,7 @@
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:src="@drawable/ic_module"
-                    app:tint="@color/gray2" />
+                    app:tint="@color/icon_primary"  />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -183,7 +185,8 @@
                 <ImageView
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:src="@drawable/ic_group" />
+                    android:src="@drawable/ic_group"
+                    app:tint="@color/icon_primary" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -207,7 +210,8 @@
                 <ImageView
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:src="@drawable/ic_brush" />
+                    android:src="@drawable/ic_brush"
+                    app:tint="@color/icon_primary"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -231,7 +235,8 @@
                 <ImageView
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:src="@drawable/ic_help" />
+                    android:src="@drawable/ic_help"
+                    app:tint="@color/icon_primary"  />
 
                 <TextView
                     android:layout_width="wrap_content"

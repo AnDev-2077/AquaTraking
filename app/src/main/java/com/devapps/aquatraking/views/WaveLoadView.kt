@@ -11,6 +11,8 @@ import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.Nullable
+import androidx.core.content.ContextCompat
+import com.devapps.aquatraking.R
 
 
 class WaveLoadView @JvmOverloads constructor(
@@ -28,6 +30,8 @@ class WaveLoadView @JvmOverloads constructor(
     private var progress = 0f
     private var textProgress = 0f
     private val startPoint = Point()
+
+    private var secondCirclePaint: Paint? = null
 
     fun setProgress(progress: Float) {
         textProgress = progress
@@ -51,8 +55,8 @@ class WaveLoadView @JvmOverloads constructor(
         textPaint!!.textSize = 50f
         shapePaint = Paint()
         shapePaint!!.isAntiAlias = true
-        shapePaint!!.color = Color.parseColor("#0368A3")
-        shapePaint!!.strokeWidth = 10f
+        shapePaint!!.color = ContextCompat.getColor(context, R.color.chart_text_primary)
+        shapePaint!!.strokeWidth = 20f
         shapePaint!!.style = Paint.Style.STROKE
     }
 
@@ -90,6 +94,7 @@ class WaveLoadView @JvmOverloads constructor(
 
     }
 
+
     private fun drawShape(canvas: Canvas) {
         canvas.drawCircle(
             (screenWidth/2).toFloat(),
@@ -106,7 +111,7 @@ class WaveLoadView @JvmOverloads constructor(
         canvas.translate(0f,screenHeight.toFloat())
         path = Path()
         wavePaint!!.style = Paint.Style.FILL
-        wavePaint!!.color = Color.parseColor("#0368A3")
+        wavePaint!!.color = ContextCompat.getColor(context, R.color.chart_gradient)
         val wave = screenWidth /4
         path!!.moveTo(startPoint.x.toFloat(), startPoint.y.toFloat())
         for (i in 0..3){

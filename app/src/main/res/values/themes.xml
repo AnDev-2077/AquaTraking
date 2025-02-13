@@ -1,9 +1,28 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.AquaTraking" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/blue2</item>
+        <item name="colorPrimaryVariant">@color/blue2</item>
+        <item name="colorOnPrimary">@color/blueText</item>
+
+        <item name="android:colorBackground">@color/blue3</item>
+
+        <item name="android:textColorPrimary">@color/text_dark</item>
+        <item name="bottomNavigationStyle">@style/Widget.AquaTraking.BottomNavigationView</item>
+
+    </style>
+    <style name="Theme.AquaTraking" parent="Base.Theme.AquaTraking" />
+    <style name="Widget.AquaTraking.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
+        <item name="android:background">@color/blue2</item>
+        <item name="android:itemBackground">@color/blue2</item>
+        <item name="itemIconTint">@color/blueText</item>
+        <item name="itemTextColor">@color/blueText</item>
+
+
+
+    </style>
+    <style name="App.Custom.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">#DCF3FF</item>
     </style>
 
-    <style name="Theme.AquaTraking" parent="Base.Theme.AquaTraking" />
 </resources>

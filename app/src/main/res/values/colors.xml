@@ -3,8 +3,26 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="blue">#0368A3</color>
+    <color name="blue2">#5AB0FD</color>
+    <color name="blue3">#DCF2FF</color>
+    <color name="blueText">#F1FAFF</color>
     <color name="gray">#9E9E9E</color>
     <color name="gray2">#5C5D5F</color>
+    <color name="gray3">#B5B5B5</color>
     <color name="red1">#EA4335</color>
     <color name="transparent">#00000000</color>
+    <color name="chart_text_primary">#1E1E1E</color>
+    <color name="chart_gradient">#0368A3</color>
+    <color name="icon_primary">#5C5D5F</color>
+
+    <!--Dark theme-->
+    <color name="darkBackground">#1F2125</color>
+    <color name="darkActionBar">#1F5297</color>
+
+    <!-- Other colors -->
+    <color name="text_dark">#1E1E1E</color>
+    <color name="text_light">#F1FAFF</color>
+
+
+
 </resources>

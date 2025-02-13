@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="blue">#FFFFFF</color>
+    <color name="chart_text_primary">#F1FAFF</color>
+    <color name="chart_gradient">#1F5297</color>
+    <color name="icon_primary">#FFFFFF</color>
+</resources>

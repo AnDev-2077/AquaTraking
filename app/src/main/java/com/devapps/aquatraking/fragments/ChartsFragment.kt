@@ -103,7 +103,7 @@ class ChartsFragment : Fragment() {
             1 -> "Semana anterior"
             else -> "Hace $currentWeekOffset semanas"
         }
-        binding.btnNextWeek.isEnabled = currentWeekOffset > 0 // Deshabilitar si es la semana actual
+        binding.btnNextWeek.isEnabled = currentWeekOffset > 0
     }
 
     private fun showDefaultValues() {
@@ -154,6 +154,9 @@ class ChartsFragment : Fragment() {
         xAxis.granularity = 1f
         xAxis.axisMinimum = 0f
         xAxis.axisMaximum = 6f
+        xAxis.textColor = resources.getColor(R.color.chart_text_primary, null)
+        xAxis.axisLineColor = resources.getColor(R.color.chart_text_primary, null)
+        xAxis.axisLineWidth = 4f
 
         val yAxisLeft = binding.lineChart.axisLeft
         yAxisLeft.axisMinimum = 0f
@@ -161,9 +164,12 @@ class ChartsFragment : Fragment() {
         yAxisLeft.granularity = 25f
         yAxisLeft.enableGridDashedLine(10f, 10f, 10f)
         yAxisLeft.setDrawGridLines(true)
-
+        yAxisLeft.textColor = resources.getColor(R.color.chart_text_primary, null)
+        yAxisLeft.axisLineColor = resources.getColor(R.color.chart_text_primary, null)
+        yAxisLeft.axisLineWidth = 4f
         val yAxisRight = binding.lineChart.axisRight
         yAxisRight.isEnabled = false
+
 
         binding.lineChart.setScaleEnabled(false)
         binding.lineChart.setPinchZoom(false)
