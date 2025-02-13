@@ -9,11 +9,12 @@
     <color name="gray">#9E9E9E</color>
     <color name="gray2">#5C5D5F</color>
     <color name="gray3">#B5B5B5</color>
-    <color name="red1">#EA4335</color>
     <color name="transparent">#00000000</color>
     <color name="chart_text_primary">#1E1E1E</color>
     <color name="chart_gradient">#0368A3</color>
     <color name="icon_primary">#5C5D5F</color>
+    <color name="menus_background">#FFFFFFFF</color>
+    <color name="pdf">#EA4335</color>
 
     <!--Dark theme-->
     <color name="darkBackground">#1F2125</color>

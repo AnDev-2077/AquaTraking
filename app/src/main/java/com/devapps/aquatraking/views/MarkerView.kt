@@ -9,7 +9,7 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.utils.MPPointF
 
-class CustomMarkerView (context: Context) : MarkerView(context, R.layout.item_marker_view){
+class MarkerView (context: Context) : MarkerView(context, R.layout.item_marker_view){
     private val binding: ItemMarkerViewBinding
 
     init {

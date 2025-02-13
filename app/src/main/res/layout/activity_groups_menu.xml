@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/menus_background">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
@@ -50,8 +50,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:text="Crear grupo"
-                android:textAppearance="?attr/textAppearanceSubtitle1"
-                android:textColor="@color/black" />
+                android:textAppearance="?attr/textAppearanceSubtitle1"/>
 
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="match_parent"
@@ -89,8 +88,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:text="Administrar grupo"
-                android:textAppearance="?attr/textAppearanceSubtitle1"
-                android:textColor="@color/black" />
+                android:textAppearance="?attr/textAppearanceSubtitle1" />
 
             <com.google.android.material.textview.MaterialTextView
 
@@ -128,8 +126,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:text="Eliminar grupo"
-                android:textAppearance="?attr/textAppearanceSubtitle1"
-                android:textColor="@color/black" />
+                android:textAppearance="?attr/textAppearanceSubtitle1" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="match_parent"

@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/menus_background">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
@@ -34,7 +34,6 @@
         android:layout_marginTop="16dp"
         android:text="Notificaciones generales"
         android:textAppearance="?attr/textAppearanceSubtitle1"
-        android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/appBarLayout" />
 
@@ -125,8 +124,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:text="Nivel bajo"
-                android:textAppearance="?attr/textAppearanceSubtitle1"
-                android:textColor="@color/black" />
+                android:textAppearance="?attr/textAppearanceSubtitle1" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tvLowLevel"
@@ -164,8 +162,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:text="Nivel critico"
-                android:textAppearance="?attr/textAppearanceSubtitle1"
-                android:textColor="@color/black" />
+                android:textAppearance="?attr/textAppearanceSubtitle1" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tvCriticLevel"
@@ -192,7 +189,6 @@
         android:layout_marginTop="12dp"
         android:text="Modo mantenimiento"
         android:textAppearance="?attr/textAppearanceSubtitle1"
-        android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/llOption2" />
 
@@ -243,8 +239,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:text="Configurar recordatorios"
-                android:textAppearance="?attr/textAppearanceSubtitle1"
-                android:textColor="@color/black" />
+                android:textAppearance="?attr/textAppearanceSubtitle1" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:layout_width="match_parent"

@@ -12,7 +12,7 @@ import androidx.fragment.app.activityViewModels
 import com.devapps.aquatraking.databinding.FragmentHomeBinding
 import com.devapps.aquatraking.services.ForegroundService
 import com.devapps.aquatraking.services.ViewModel
-import com.devapps.aquatraking.views.WaveLoadView
+import com.devapps.aquatraking.views.CustomWaveView
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -32,7 +32,9 @@ class HomeFragment : Fragment() {
     private val tankViewModel: ViewModel by activityViewModels() // ViewModel compartido
 
     private lateinit var binding: FragmentHomeBinding
-    private var waveView: WaveLoadView? = null
+
+    private var waveView2: CustomWaveView? = null
+
     private lateinit var database: DatabaseReference
     private var currentDate: Calendar = Calendar.getInstance()
     private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
@@ -69,7 +71,7 @@ class HomeFragment : Fragment() {
         val serviceIntent = Intent(requireContext(), ForegroundService::class.java)
         requireContext().startService(serviceIntent)
         // Inicializar vistas y listeners
-        waveView = binding.waveView
+        waveView2 = binding.waveView
         database = FirebaseDatabase.getInstance().reference.child("ModulesWifi")
         // Mostrar fecha actual
         binding.tvDate.text = dateFormat.format(currentDate.time)
@@ -96,27 +98,6 @@ class HomeFragment : Fragment() {
     private fun rebootListener() {
         consumoListener?.let { database.removeEventListener(it) }
     }
-
-    /*private fun loadTankData(key: String) {
-        val ref = FirebaseDatabase.getInstance().getReference("ModulesWifi/$key")
-        ref.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    for (childSnapshot in snapshot.children) {
-                        val fecha = childSnapshot.child("fecha").getValue(String::class.java)
-                        val porcentaje = childSnapshot.child("porcentaje").getValue(String::class.java)
-                        Log.d("HomeFragment", "Fecha: $fecha, Porcentaje: $porcentaje")
-                        updateWaveView(childSnapshot)
-                    }
-                } else {
-                    Log.e("HomeFragment", "No se encontraron datos para la clave: $key")
-                }
-            }
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("HomeFragment", "Error al leer datos: ${error.message}")
-            }
-        })
-    }*/
 
     private fun loadTankData(key: String) {
         val ref = FirebaseDatabase.getInstance().getReference("ModulesWifi/$key")
@@ -151,7 +132,7 @@ class HomeFragment : Fragment() {
 
 
     private fun showDefaultData() {
-        waveView?.setProgress(0f)
+        waveView2?.setProgress(0f)
     }
 
     private fun actualizarFechaDisplay() {
@@ -205,7 +186,8 @@ class HomeFragment : Fragment() {
         val porcentaje = snapshot.child("porcentaje").getValue(String::class.java)?.toFloatOrNull()
         val fecha = snapshot.child("fecha").getValue(String::class.java)
         if (porcentaje != null && fecha != null) {
-            waveView?.setProgress(porcentaje)
+            waveView2?.setProgress(porcentaje)
+            binding.tvPercentage.text = "${porcentaje.toInt()}%"
             Log.d("HomeFragment", "Porcentaje actualizado: $porcentaje% para la fecha: ${snapshot.child("fecha").value}")
             sendPercentageToService(porcentaje, fecha)
         } else {

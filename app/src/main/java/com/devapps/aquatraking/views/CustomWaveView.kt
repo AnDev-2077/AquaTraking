@@ -1,5 +1,6 @@
 package com.devapps.aquatraking.views
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -18,7 +19,7 @@ class CustomWaveView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    private val path = Path()
+    private var path = Path()
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var wavePaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var progress = 0f
@@ -26,27 +27,41 @@ class CustomWaveView @JvmOverloads constructor(
     private val wavePath = Path()
     private var waveOffset = 0f
     private val waveSpeed = 5f
+    private val animator: ValueAnimator
 
     // Puntos originales (en dp)
     private val originalPoints = listOf(
-        PointF(54f, 24f), PointF(180f, 24f), PointF(234f, 56f),
+        //PointF(54f, 24f),
+        PointF(180f, 24f), PointF(234f, 56f),
         PointF(234f, 270f), PointF(213f, 298f), PointF(127f, 306f),
         PointF(106f, 306f), PointF(21f, 298f), PointF(0f, 270f),
         PointF(0f, 56f), PointF(54f, 24f), PointF(54f, 0f), PointF(180f, 0f),
-        PointF(180f, 24f)
+        PointF(180f, 24f), PointF(234f, 56f), PointF(234f, 270f),
+        PointF(213f, 298f), PointF(127f, 306f), PointF(106f, 306f),
+        PointF(21f, 298f), PointF(0f, 270f), PointF(0f, 56f),
+        PointF(54f, 24f)
     )
 
     // Dimensiones de la figura (en dp)
-    private val figureWidth = 234f // Ancho máximo de la figura
-    private val figureHeight = 306f // Alto máximo de la figura
+    private val figureWidth = 238f  // Ancho máximo de la figura
+    private val figureHeight = 310f // Alto máximo de la figura
 
     init {
         setupPaint()
+        animator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 1000L
+            repeatCount = ValueAnimator.INFINITE
+            addUpdateListener {
+                waveOffset += waveSpeed
+                invalidate()
+            }
+            start()
+        }
     }
 
     private fun setupPaint() {
         paint.apply {
-            color = Color.BLACK
+            color = ContextCompat.getColor(context, R.color.chart_text_primary)
             style = Paint.Style.STROKE
             strokeWidth = 4f.dpToPx()
             strokeJoin = Paint.Join.ROUND
@@ -73,8 +88,12 @@ class CustomWaveView @JvmOverloads constructor(
 
     private fun createPath() {
         path.reset()
+
+        val offsetX = 2f.dpToPx()
+        val offsetY = 2f.dpToPx()
+
         val scaledPoints = originalPoints.map {
-            PointF(it.x.dpToPx(), it.y.dpToPx())
+            PointF(it.x.dpToPx() + offsetX, it.y.dpToPx() + offsetY)
         }
         path.moveTo(scaledPoints[0].x, scaledPoints[0].y)
         scaledPoints.forEach { point ->
@@ -97,12 +116,12 @@ class CustomWaveView @JvmOverloads constructor(
         val waveStartY = height - waveHeight
         wavePath.reset()
         wavePath.moveTo(0f, waveStartY)
-        val waveWidth = width / 4f
+        val waveWidth = width / 2f // Aumenta el ancho de la onda
 
-        for (i in 0..3) {
-            val startX = i * waveWidth * 2 - waveOffset
-            val endX = startX + 2 * waveWidth
-            val controlY = if (i % 2 == 0) waveStartY - amplitude else waveStartY + amplitude
+        for (i in 0..width + waveWidth.toInt() step waveWidth.toInt()) {
+            val startX = i.toFloat()
+            val endX = startX + waveWidth
+            val controlY = waveStartY + amplitude * Math.sin((startX + waveOffset) * Math.PI / waveWidth).toFloat()
             wavePath.quadTo((startX + endX) / 2, controlY, endX, waveStartY)
         }
 
@@ -110,8 +129,6 @@ class CustomWaveView @JvmOverloads constructor(
         wavePath.lineTo(0f, height.toFloat())
         wavePath.close()
         canvas.drawPath(wavePath, wavePaint)
-        waveOffset = (waveOffset + waveSpeed) % (2 * waveWidth)
-        postInvalidateDelayed(10)
     }
 
     fun setProgress(progress: Float) {

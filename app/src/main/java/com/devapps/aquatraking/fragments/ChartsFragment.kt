@@ -9,7 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
-import com.devapps.aquatraking.views.CustomMarkerView
+import com.devapps.aquatraking.views.MarkerView
 import com.devapps.aquatraking.R
 import com.devapps.aquatraking.databinding.FragmentChartsBinding
 import com.devapps.aquatraking.services.ViewModel
@@ -142,9 +142,11 @@ class ChartsFragment : Fragment() {
 
         binding.lineChart.description.isEnabled = false
         binding.lineChart.legend.isEnabled = false
-        val markerView = CustomMarkerView(requireContext())
+        val markerView = MarkerView(requireContext())
         markerView.chartView = binding.lineChart
         binding.lineChart.marker = markerView
+
+        binding.lineChart.setExtraOffsets(8f, 20f, 20f, 20f)
 
         val xAxis = binding.lineChart.xAxis
         xAxis.position = XAxis.XAxisPosition.BOTTOM
@@ -156,7 +158,9 @@ class ChartsFragment : Fragment() {
         xAxis.axisMaximum = 6f
         xAxis.textColor = resources.getColor(R.color.chart_text_primary, null)
         xAxis.axisLineColor = resources.getColor(R.color.chart_text_primary, null)
+        xAxis.textSize = 16f
         xAxis.axisLineWidth = 4f
+        xAxis.setYOffset(10f)
 
         val yAxisLeft = binding.lineChart.axisLeft
         yAxisLeft.axisMinimum = 0f
@@ -166,9 +170,11 @@ class ChartsFragment : Fragment() {
         yAxisLeft.setDrawGridLines(true)
         yAxisLeft.textColor = resources.getColor(R.color.chart_text_primary, null)
         yAxisLeft.axisLineColor = resources.getColor(R.color.chart_text_primary, null)
+        yAxisLeft.textSize = 16f
         yAxisLeft.axisLineWidth = 4f
         val yAxisRight = binding.lineChart.axisRight
         yAxisRight.isEnabled = false
+        yAxisLeft.setXOffset(10f)
 
 
         binding.lineChart.setScaleEnabled(false)

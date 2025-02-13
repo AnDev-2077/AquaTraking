@@ -4,23 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/menus_background">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:elevation="0dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/white"
-            app:navigationIcon="@drawable/ic_arrow_left"
-            app:navigationIconTint="@color/black" />
+            android:background="?attr/colorPrimary"
+            app:navigationIcon="@drawable/ic_arrow_left"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -31,7 +29,6 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="16dp"
         android:text="Agregar módulo"
-        android:textColor="@color/black"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -44,7 +41,6 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="24dp"
         android:text="Clave del módulo"
-        android:textColor="@color/black"
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvTitle" />
@@ -92,7 +88,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:text="Cancelar"
-            android:textColor="@color/blue" />
+            android:textColor="@color/chart_gradient" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAdd"
@@ -100,7 +96,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Agregar"
-            android:textColor="@color/blue" />
+            android:textColor="@color/chart_gradient" />
 
     </LinearLayout>
 

@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/menus_background"
     tools:context=".activities.DevicesActivity">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -65,10 +65,10 @@
 
         <ImageView
             android:id="@+id/ivAdd"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:src="@drawable/ic_add"
-            app:tint="@color/gray2"
+            app:tint="@color/icon_primary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -107,7 +107,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/gray2" />
+                app:tint="@color/icon_primary" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 

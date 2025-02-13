@@ -25,7 +25,7 @@
                 android:id="@+id/ivUser"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="16dp"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -41,7 +41,7 @@
                 app:layout_constraintTop_toTopOf="@id/ivUser"
                 app:layout_constraintStart_toEndOf="@id/ivUser"
                 app:layout_constraintEnd_toStartOf="@id/btLogin"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="16dp"
                 android:text="User"
                 android:textStyle="bold" />
 
@@ -61,7 +61,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:layout_marginEnd="8dp"
+                android:layout_marginEnd="16dp"
                 android:text="Iniciar sesión" />
             <Button
                 android:id="@+id/btLogOut"
@@ -91,21 +91,20 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp">
+            android:layout_height="wrap_content">
 
             <!-- Usando LinearLayout en lugar de ImageView -->
             <LinearLayout
                 android:id="@+id/llOption1"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="76dp"
                 android:orientation="horizontal"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?android:attr/selectableItemBackground"
-                android:padding="8dp">
+                android:padding="16dp">
 
                 <ImageView
                     android:layout_width="32dp"
@@ -116,21 +115,21 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="16dp"
                     android:text="Notificaciones" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/llOption2"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="76dp"
                 android:orientation="horizontal"
                 app:layout_constraintTop_toBottomOf="@id/llOption1"
                 app:layout_constraintStart_toStartOf="parent"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?android:attr/selectableItemBackground"
-                android:padding="8dp">
+                android:padding="16dp">
 
                 <ImageView
                     android:layout_width="32dp"
@@ -141,21 +140,21 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="16dp"
                     android:text="Almacenamineto de datos" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/llOption3"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="76dp"
                 android:orientation="horizontal"
                 app:layout_constraintTop_toBottomOf="@id/llOption2"
                 app:layout_constraintStart_toStartOf="parent"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?android:attr/selectableItemBackground"
-                android:padding="8dp">
+                android:padding="16dp">
 
                 <ImageView
                     android:layout_width="32dp"
@@ -166,21 +165,21 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="16dp"
                     android:text="Modulos" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/llOption4"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="76dp"
                 android:orientation="horizontal"
                 app:layout_constraintTop_toBottomOf="@id/llOption3"
                 app:layout_constraintStart_toStartOf="parent"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?android:attr/selectableItemBackground"
-                android:padding="8dp">
+                android:padding="16dp">
 
                 <ImageView
                     android:layout_width="32dp"
@@ -191,21 +190,21 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="16dp"
                     android:text="Grupos" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/llOption5"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="76dp"
                 android:orientation="horizontal"
                 app:layout_constraintTop_toBottomOf="@id/llOption4"
                 app:layout_constraintStart_toStartOf="parent"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?android:attr/selectableItemBackground"
-                android:padding="8dp">
+                android:padding="16dp">
 
                 <ImageView
                     android:layout_width="32dp"
@@ -216,21 +215,21 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="16dp"
                     android:text="Temas" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/llOption6"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="76dp"
                 android:orientation="horizontal"
                 app:layout_constraintTop_toBottomOf="@id/llOption5"
                 app:layout_constraintStart_toStartOf="parent"
                 android:clickable="true"
                 android:focusable="true"
                 android:background="?android:attr/selectableItemBackground"
-                android:padding="8dp">
+                android:padding="16dp">
 
                 <ImageView
                     android:layout_width="32dp"
@@ -241,7 +240,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="16dp"
                     android:text="Ayuda" />
             </LinearLayout>
 

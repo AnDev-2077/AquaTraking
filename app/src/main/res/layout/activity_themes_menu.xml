@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/menus_background">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
@@ -34,7 +34,6 @@
         android:layout_marginTop="16dp"
         android:text="Modo noche"
         android:textAppearance="?attr/textAppearanceSubtitle1"
-        android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/appBarLayout" />
 
@@ -69,7 +68,6 @@
         android:layout_marginTop="24dp"
         android:text="Temas"
         android:textAppearance="?attr/textAppearanceSubtitle1"
-        android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvNightModeDescription" />
 

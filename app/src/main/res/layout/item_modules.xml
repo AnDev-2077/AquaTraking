@@ -2,18 +2,20 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingBottom="6dp"
-    android:paddingTop="6dp"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:paddingBottom="8dp"
+    android:paddingTop="8dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?android:attr/selectableItemBackground">
 
     <TextView
         android:id="@+id/tvKeyModule"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Id del dispositivo"
-        android:textColor="@android:color/black"
         android:textSize="16sp"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/icon"
         app:layout_constraintTop_toTopOf="parent" />
@@ -26,7 +28,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="24dp"
-        app:tint="@color/gray2" />
+        android:layout_marginStart="16dp"
+        app:tint="@color/icon_primary" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
