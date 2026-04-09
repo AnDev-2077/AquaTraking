@@ -124,8 +124,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun actualizarDatos(snapshot: DataSnapshot) {
-        val fecha = snapshot.child("fecha").getValue(String::class.java)
-        val porcentaje = snapshot.child("porcentaje").getValue(String::class.java)
+        val fecha = snapshot.child("fecha").value?.toString() ?: "Sin fecha"
+        val porcentaje = snapshot.child("porcentaje").value?.toString() ?: "0"
         Log.d("HomeFragment", "Fecha: $fecha, Porcentaje: $porcentaje")
         updateWaveView(snapshot)
     }
@@ -183,8 +183,10 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateWaveView(snapshot: DataSnapshot) {
-        val porcentaje = snapshot.child("porcentaje").getValue(String::class.java)?.toFloatOrNull()
-        val fecha = snapshot.child("fecha").getValue(String::class.java)
+        val porcentajeStr = snapshot.child("porcentaje").value?.toString()
+        val porcentaje = porcentajeStr?.toFloatOrNull()
+
+        val fecha = snapshot.child("fecha").value?.toString()
         if (porcentaje != null && fecha != null) {
             waveView2?.setProgress(porcentaje)
             binding.tvPercentage.text = "${porcentaje.toInt()}%"

@@ -202,12 +202,10 @@ class ChartsFragment : Fragment() {
 
     private fun getEntriesForWeek(dataSnapshot: DataSnapshot, weekOffset: Int): List<Entry> {
         val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-        // Opcional: asegurarse de usar la zona horaria del dispositivo
         sdf.timeZone = Calendar.getInstance().timeZone
 
         val entries = mutableListOf<Entry>()
 
-        // Inicio de semana: lunes a las 00:00:00.000
         val startOfWeek = Calendar.getInstance().apply {
             firstDayOfWeek = Calendar.MONDAY
             add(Calendar.WEEK_OF_YEAR, -weekOffset)
@@ -218,7 +216,6 @@ class ChartsFragment : Fragment() {
             set(Calendar.MILLISECOND, 0)
         }
 
-        // Fin de semana: domingo a las 23:59:59.999
         val endOfWeek = (startOfWeek.clone() as Calendar).apply {
             add(Calendar.DAY_OF_MONTH, 6)
             set(Calendar.HOUR_OF_DAY, 23)
@@ -230,40 +227,58 @@ class ChartsFragment : Fragment() {
         Log.d("ChartsFragment", "Rango de la semana: ${sdf.format(startOfWeek.time)} - ${sdf.format(endOfWeek.time)}")
 
         dataSnapshot.children.forEach { recordSnapshot ->
-            val fechaString = recordSnapshot.child("fecha").getValue(String::class.java)
-            val porcentajeStr = recordSnapshot.child("porcentaje").getValue(String::class.java)
 
-            if (!fechaString.isNullOrEmpty() && !porcentajeStr.isNullOrEmpty()) {
+            val fechaRaw = recordSnapshot.child("fecha").value
+            val fechaString: String? = when (fechaRaw) {
+                is String -> fechaRaw
+                is Long -> sdf.format(java.util.Date(fechaRaw))
+                else -> null
+            }
+
+            val porcentajeRaw = recordSnapshot.child("porcentaje").value
+            val porcentaje: Float? = when (porcentajeRaw) {
+                is String -> porcentajeRaw.toFloatOrNull()
+                is Long -> porcentajeRaw.toFloat()
+                is Double -> porcentajeRaw.toFloat()
+                else -> null
+            }
+
+            if (!fechaString.isNullOrEmpty() && porcentaje != null) {
                 try {
                     val fecha = sdf.parse(fechaString)
-                    val calendarFecha = Calendar.getInstance().apply {
-                        time = fecha
-                        set(Calendar.MILLISECOND, 0)
-                    }
-
-                    // Verificar si la fecha está dentro del rango
-                    if (!calendarFecha.before(startOfWeek) && !calendarFecha.after(endOfWeek)) {
-                        val xValue = when (calendarFecha.get(Calendar.DAY_OF_WEEK)) {
-                            Calendar.MONDAY -> 0f
-                            Calendar.TUESDAY -> 1f
-                            Calendar.WEDNESDAY -> 2f
-                            Calendar.THURSDAY -> 3f
-                            Calendar.FRIDAY -> 4f
-                            Calendar.SATURDAY -> 5f
-                            Calendar.SUNDAY -> 6f
-                            else -> -1f
+                    if (fecha != null) {
+                        val calendarFecha = Calendar.getInstance().apply {
+                            time = fecha
+                            set(Calendar.HOUR_OF_DAY, 0)
+                            set(Calendar.MINUTE, 0)
+                            set(Calendar.SECOND, 0)
+                            set(Calendar.MILLISECOND, 0)
                         }
-                        val porcentaje = porcentajeStr.toFloatOrNull() ?: 0f
-                        entries.add(Entry(xValue, porcentaje))
-                        Log.d("ChartsFragment", "Agregado -> Fecha: $fechaString, Día: ${calendarFecha.get(Calendar.DAY_OF_WEEK)}, xValue: $xValue, Porcentaje: $porcentaje")
+
+                        if (!calendarFecha.before(startOfWeek) && !calendarFecha.after(endOfWeek)) {
+                            val xValue = when (calendarFecha.get(Calendar.DAY_OF_WEEK)) {
+                                Calendar.MONDAY -> 0f
+                                Calendar.TUESDAY -> 1f
+                                Calendar.WEDNESDAY -> 2f
+                                Calendar.THURSDAY -> 3f
+                                Calendar.FRIDAY -> 4f
+                                Calendar.SATURDAY -> 5f
+                                Calendar.SUNDAY -> 6f
+                                else -> -1f
+                            }
+
+                            if (xValue != -1f) {
+                                entries.add(Entry(xValue, porcentaje))
+                                Log.d("ChartsFragment", "Agregado -> Fecha: $fechaString, xValue: $xValue, Porcentaje: $porcentaje")
+                            }
+                        }
                     }
                 } catch (e: Exception) {
-                    Log.e("ChartsFragment", "Error al parsear fecha: ${e.message}")
+                    Log.e("ChartsFragment", "Error al procesar registro: ${e.message}")
                 }
             }
         }
 
-        // Rellenar días faltantes con 0
         return (0..6).map { day ->
             entries.firstOrNull { it.x == day.toFloat() } ?: Entry(day.toFloat(), 0f)
         }.sortedBy { it.x }
