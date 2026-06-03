@@ -8,7 +8,9 @@ import com.google.android.material.appbar.MaterialToolbar
 
 class ThemesMenuActivity : AppCompatActivity() {
 
-    lateinit var binding: ActivityThemesMenuBinding
+    private lateinit var binding: ActivityThemesMenuBinding
+    private val PREFS_NAME = "theme_prefs"
+    private val KEY_NIGHT_MODE = "night_mode"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,21 +22,21 @@ class ThemesMenuActivity : AppCompatActivity() {
             onBackPressedDispatcher.onBackPressed()
         }
 
-        binding.switchNightMode.setOnCheckedChangeListener{_, isSelected ->
-            if (isSelected){
-                enableDarkMode()
-            } else {
-                disableDarkMode()
-            }
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        binding.switchNightMode.isChecked = prefs.getBoolean(KEY_NIGHT_MODE, false)
+
+        binding.switchNightMode.setOnCheckedChangeListener { _, isChecked ->
+            prefs.edit().putBoolean(KEY_NIGHT_MODE, isChecked).apply()
+            if (isChecked) enableDarkMode() else disableDarkMode()
         }
     }
 
-    private fun enableDarkMode(){
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+    private fun enableDarkMode() {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         delegate.applyDayNight()
     }
 
-    private fun disableDarkMode(){
+    private fun disableDarkMode() {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         delegate.applyDayNight()
     }

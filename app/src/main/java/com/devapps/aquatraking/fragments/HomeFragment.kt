@@ -29,17 +29,18 @@ class HomeFragment : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
 
-    private val tankViewModel: ViewModel by activityViewModels() // ViewModel compartido
+    private val tankViewModel: ViewModel by activityViewModels()
 
-    private lateinit var binding: FragmentHomeBinding
+    private var _binding: FragmentHomeBinding? = null
+    private val binding get() = _binding!!
 
     private var waveView2: CustomWaveView? = null
 
-    private lateinit var database: DatabaseReference
     private var currentDate: Calendar = Calendar.getInstance()
     private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
     private var consumoListener: ChildEventListener? = null
+    private var consumoRef: DatabaseReference? = null
 
     private val maxDaysBack = 5
     private var currentOffset = 0
@@ -56,27 +57,21 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentHomeBinding.inflate(inflater, container, false)
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.d("HomeFragment", "onViewCreated called")
-        // Observar cambios en la key seleccionada
         tankViewModel.selectedKey.observe(viewLifecycleOwner) { key ->
             key?.let { loadTankData(it) } ?: showDefaultData()
         }
-        // Iniciar el servicio en primer plano
         val serviceIntent = Intent(requireContext(), ForegroundService::class.java)
         requireContext().startService(serviceIntent)
-        // Inicializar vistas y listeners
         waveView2 = binding.waveView
-        database = FirebaseDatabase.getInstance().reference.child("ModulesWifi")
-        // Mostrar fecha actual
         binding.tvDate.text = dateFormat.format(currentDate.time)
         actualizarFechaDisplay()
-        // Configurar listeners de los botones
         binding.btnPrevious.setOnClickListener {
             if (currentOffset < maxDaysBack) {
                 currentOffset++
@@ -91,18 +86,14 @@ class HomeFragment : Fragment() {
                 actualizarConsumoPorDia()
             }
         }
-        // Cargar datos iniciales
         actualizarConsumoPorDia()
     }
 
-    private fun rebootListener() {
-        consumoListener?.let { database.removeEventListener(it) }
-    }
-
     private fun loadTankData(key: String) {
-        val ref = FirebaseDatabase.getInstance().getReference("ModulesWifi/$key")
+        consumoListener?.let { consumoRef?.removeEventListener(it) }
 
-        ref.addChildEventListener(object : ChildEventListener {
+        val ref = FirebaseDatabase.getInstance().getReference("ModulesWifi/$key")
+        val listener = object : ChildEventListener {
             override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
                 actualizarDatos(snapshot)
             }
@@ -120,7 +111,10 @@ class HomeFragment : Fragment() {
             override fun onCancelled(error: DatabaseError) {
                 Log.e("HomeFragment", "Error al leer datos: ${error.message}")
             }
-        })
+        }
+        ref.addChildEventListener(listener)
+        consumoListener = listener
+        consumoRef = ref
     }
 
     private fun actualizarDatos(snapshot: DataSnapshot) {
@@ -129,7 +123,6 @@ class HomeFragment : Fragment() {
         Log.d("HomeFragment", "Fecha: $fecha, Porcentaje: $porcentaje")
         updateWaveView(snapshot)
     }
-
 
     private fun showDefaultData() {
         waveView2?.setProgress(0f)
@@ -156,7 +149,6 @@ class HomeFragment : Fragment() {
         }
         val fechaFormateada = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(targetDate.time)
 
-        // Obtener la referencia correcta
         val ref = FirebaseDatabase.getInstance().getReference("ModulesWifi/${tankViewModel.selectedKey.value}")
         ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -165,7 +157,7 @@ class HomeFragment : Fragment() {
                         val fecha = childSnapshot.child("fecha").getValue(String::class.java)
                         if (fecha == fechaFormateada) {
                             updateWaveView(childSnapshot)
-                            return // Salir después de encontrar la fecha correcta
+                            return
                         }
                     }
                     Log.e("HomeFragment", "No se encontraron datos para la fecha: $fechaFormateada")
@@ -209,7 +201,10 @@ class HomeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        rebootListener()
+        consumoListener?.let { consumoRef?.removeEventListener(it) }
+        consumoListener = null
+        consumoRef = null
+        _binding = null
     }
 
     companion object {

@@ -28,7 +28,8 @@ import java.util.Locale
 
 class ChartsFragment : Fragment() {
 
-    private lateinit var binding: FragmentChartsBinding
+    private var _binding: FragmentChartsBinding? = null
+    private val binding get() = _binding!!
     private var currentWeekOffset = 0
 
     private val tankViewModel: ViewModel by activityViewModels()
@@ -37,7 +38,7 @@ class ChartsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentChartsBinding.inflate(inflater, container, false)
+        _binding = FragmentChartsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -286,6 +287,7 @@ class ChartsFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        _binding = null
     }
 
     companion object {
