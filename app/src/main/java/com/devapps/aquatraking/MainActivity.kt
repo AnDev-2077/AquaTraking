@@ -1,5 +1,6 @@
 package com.devapps.aquatraking
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -9,7 +10,6 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.PopupMenu
 import android.widget.Spinner
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
@@ -112,8 +112,8 @@ class MainActivity : AppCompatActivity() {
         popupMenu.menuInflater.inflate(R.menu.menu_add_devices, popupMenu.menu)
         popupMenu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                R.id.addDevice -> Toast.makeText(this, "Añadir dispositivo", Toast.LENGTH_SHORT).show()
-                R.id.scanDevice -> Toast.makeText(this, "Escanear", Toast.LENGTH_SHORT).show()
+                R.id.addDevice  -> startActivity(Intent(this, com.devapps.aquatraking.activities.DevicesActivity::class.java))
+                R.id.scanDevice -> startActivity(Intent(this, com.devapps.aquatraking.activities.DevicesActivity::class.java))
             }
             true
         }
@@ -176,4 +176,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+
 }

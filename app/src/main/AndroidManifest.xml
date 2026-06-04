@@ -51,6 +51,9 @@
             android:foregroundServiceType="dataSync" />
 
         <activity
+            android:name=".activities.CalibrationActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.ThemesMenuActivity"
             android:exported="false" />
         <activity

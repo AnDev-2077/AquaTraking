@@ -1,5 +1,6 @@
 package com.devapps.aquatraking.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -7,10 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.devapps.aquatraking.databinding.ActivityAddModuleByCodeBinding
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 
@@ -47,22 +44,19 @@ class AddDeviceActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val databaseReference = FirebaseDatabase.getInstance().getReference("/ModulesWifi/")
-            databaseReference.child(key).addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if(snapshot.exists()){
-                        linkModuleToUser(userId,key)
+            FirebaseFirestore.getInstance().collection("modules").document(key)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        linkModuleToUser(userId, key)
                         Toast.makeText(this@AddDeviceActivity, "La clave existe en la base de datos.", Toast.LENGTH_SHORT).show()
-                    }else{
+                    } else {
                         Toast.makeText(this@AddDeviceActivity, "La clave no existe en la base de datos.", Toast.LENGTH_SHORT).show()
                     }
                 }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Toast.makeText(this@AddDeviceActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
+                .addOnFailureListener { e ->
+                    Toast.makeText(this@AddDeviceActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
-
-            })
         }
     }
 
@@ -71,19 +65,21 @@ class AddDeviceActivity : AppCompatActivity() {
         val userDocRef = firestore.collection("users").document(userId)
         val moduleDocRef = firestore.collection("modules").document(moduleKey)
 
-        //Verificar si el módulo ya existe en la colección "modules" fuera de la transacción
         moduleDocRef.get().addOnSuccessListener { moduleSnapshot ->
-            if (moduleSnapshot.exists()) {
-                //El módulo ya está registrado por otro usuario
+            // Un documento vacío (sin campo "owner") significa que la clave es válida pero no reclamada.
+            // Solo se bloquea si ya tiene dueño.
+            val alreadyOwned = moduleSnapshot.exists() && moduleSnapshot.getString("owner") != null
+
+            if (alreadyOwned) {
                 Toast.makeText(this, "Este módulo ya está registrado por otro usuario.", Toast.LENGTH_SHORT).show()
             } else {
-                //Ejecutar la transacción
                 firestore.runTransaction { transaction ->
-                    //1.Realizar todas las lecturas primero
                     val userSnapshot = transaction.get(userDocRef)
                     val moduleSnapshotInside = transaction.get(moduleDocRef)
-                    //Aunque ya se verificó fuera de la transacción, se vuelve a leer para garantizar consistencia
-                    if (moduleSnapshotInside.exists()) {
+
+                    val ownedInsideTransaction = moduleSnapshotInside.exists() &&
+                        moduleSnapshotInside.getString("owner") != null
+                    if (ownedInsideTransaction) {
                         throw FirebaseFirestoreException(
                             "El módulo ya está registrado por otro usuario.",
                             FirebaseFirestoreException.Code.ABORTED
@@ -96,22 +92,22 @@ class AddDeviceActivity : AppCompatActivity() {
                             FirebaseFirestoreException.Code.ABORTED
                         )
                     }
-                    //2. Una vez terminadas las lecturas, realizar las escrituras
                     transaction.set(moduleDocRef, hashMapOf("owner" to userId))
                     modules.add(moduleKey)
                     transaction.update(userDocRef, "modules", modules)
                 }.addOnSuccessListener {
-                    //Guardar el módulo localmente (opcional)
                     saveModuleKeyLocally(moduleKey)
-                    Toast.makeText(this, "Módulo vinculado correctamente.", Toast.LENGTH_SHORT).show()
+                    setResult(RESULT_OK)
+                    val intent = Intent(this, CalibrationActivity::class.java)
+                    intent.putExtra("moduleKey", moduleKey)
+                    startActivity(intent)
+                    finish()
                 }.addOnFailureListener { e ->
-                    //Manejar errores
                     Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                     Log.e("AddModuleByCodeActivity", "Error al vincular el módulo", e)
                 }
             }
         }.addOnFailureListener { e ->
-            // Manejar errores al verificar el módulo
             Toast.makeText(this, "Error al verificar el módulo: ${e.message}", Toast.LENGTH_SHORT).show()
             Log.e("AddModuleByCodeActivity", "Error al verificar el módulo", e)
         }

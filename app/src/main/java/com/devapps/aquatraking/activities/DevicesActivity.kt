@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,7 +25,11 @@ class DevicesActivity : AppCompatActivity() {
     private lateinit var devicesAdapter: DevicesAdapter
     private lateinit var binding: ActivityModulesBinding
     private lateinit var barcodeLauncher: ActivityResultLauncher<ScanOptions>
+    private lateinit var addDeviceLauncher: ActivityResultLauncher<Intent>
     private val devicesList = mutableListOf<Device>()
+
+    private val PREFS_DEVICES = "devices_cache"
+    private val KEY_MODULE_KEYS = "module_keys"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,14 +38,28 @@ class DevicesActivity : AppCompatActivity() {
 
         recyclerView = binding.rvDevices
         recyclerView.layoutManager = LinearLayoutManager(this)
-        devicesAdapter = DevicesAdapter(devicesList)
+        devicesAdapter = DevicesAdapter(
+            devicesList,
+            onCalibrate = { device ->
+                val intent = Intent(this, CalibrationActivity::class.java)
+                intent.putExtra("moduleKey", device.key)
+                startActivity(intent)
+            },
+            onDeviceUnlinked = { key ->
+                val prefs = getSharedPreferences(PREFS_DEVICES, MODE_PRIVATE)
+                val cached = prefs.getStringSet(KEY_MODULE_KEYS, mutableSetOf())?.toMutableSet() ?: mutableSetOf()
+                cached.remove(key)
+                prefs.edit().putStringSet(KEY_MODULE_KEYS, cached).apply()
+                updateRecyclerViewVisibility()
+            }
+        )
         recyclerView.adapter = devicesAdapter
 
-        val userId = FirebaseAuth.getInstance().currentUser?.uid
-        if (userId != null) {
-            loadUserDevices(userId)
-        } else {
-            Toast.makeText(this, "Usuario no autenticado.", Toast.LENGTH_SHORT).show()
+        addDeviceLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@registerForActivityResult
+                loadUserDevices(userId)
+            }
         }
 
         barcodeLauncher = registerForActivityResult(ScanContract()) { result ->
@@ -51,14 +70,22 @@ class DevicesActivity : AppCompatActivity() {
             }
         }
 
+        showCachedDevices()
+
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            loadUserDevices(userId)
+        } else {
+            Toast.makeText(this, "Usuario no autenticado.", Toast.LENGTH_SHORT).show()
+        }
+
         val toolbar: MaterialToolbar = binding.toolbar
         toolbar.setNavigationOnClickListener{
             onBackPressedDispatcher.onBackPressed()
         }
 
-        binding.clAddDevice.setOnClickListener{
-            val intent = Intent(this, AddDeviceActivity::class.java)
-            startActivity(intent)
+        binding.clAddDevice.setOnClickListener {
+            addDeviceLauncher.launch(Intent(this, AddDeviceActivity::class.java))
         }
 
         binding.clAddDeviceByQrCode.setOnClickListener{ initScanner() }
@@ -77,34 +104,60 @@ class DevicesActivity : AppCompatActivity() {
 
     private fun loadUserDevices(userId: String) {
         val firestore = FirebaseFirestore.getInstance()
-        val userDocRef = firestore.collection("users").document(userId)
-        userDocRef.get()
-            .addOnSuccessListener { documentSnapshot ->
-                if (documentSnapshot.exists()) {
-                    // Se asume que "modules" es un Array o List de String
-                    val modules = documentSnapshot.get("modules") as? List<String>
-                    if (modules != null) {
+        val user = FirebaseAuth.getInstance().currentUser ?: return
+        val userEmail = user.email ?: return
+
+        firestore.collection("users").document(userId).get()
+            .addOnSuccessListener { doc ->
+                val personalKeys = doc.get("modules") as? List<String> ?: emptyList()
+
+                firestore.collection("groups")
+                    .whereArrayContains("members", userEmail)
+                    .get()
+                    .addOnSuccessListener { groupSnapshot ->
+                        val groupKeys = groupSnapshot.documents
+                            .mapNotNull { it.getString("deviceKey") }
+                            .filter { it.isNotEmpty() }
+
+                        val allKeys = (personalKeys + groupKeys).distinct()
                         devicesList.clear()
-                        modules.forEach { moduleKey ->
-                            devicesList.add(Device(moduleKey))
-                        }
+                        allKeys.forEach { devicesList.add(Device(it)) }
                         devicesAdapter.notifyDataSetChanged()
                         updateRecyclerViewVisibility()
-                    } else {
-                        Toast.makeText(this, "No se encontraron módulos.", Toast.LENGTH_SHORT).show()
-                        updateRecyclerViewVisibility()
+                        saveCachedDevices(allKeys)
                     }
-                } else {
-                    Toast.makeText(this, "El documento del usuario no existe.", Toast.LENGTH_SHORT).show()
-                }
+                    .addOnFailureListener { e ->
+                        devicesList.clear()
+                        personalKeys.forEach { devicesList.add(Device(it)) }
+                        devicesAdapter.notifyDataSetChanged()
+                        updateRecyclerViewVisibility()
+                        saveCachedDevices(personalKeys)
+                        Log.e("DevicesActivity", "Error al cargar grupos: ${e.message}")
+                    }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Error al obtener los módulos: ${e.message}", Toast.LENGTH_SHORT).show()
-                Log.e("ModulesActivity", "Error al obtener los módulos", e)
+                Toast.makeText(this, "Error al obtener módulos: ${e.message}", Toast.LENGTH_SHORT).show()
+                Log.e("DevicesActivity", "Error al obtener los módulos: ${e.message}")
             }
     }
 
     private fun updateRecyclerViewVisibility() {
         binding.rvDevices.visibility = if (devicesAdapter.itemCount > 0) View.VISIBLE else View.GONE
+    }
+
+    private fun showCachedDevices() {
+        val keys = getSharedPreferences(PREFS_DEVICES, MODE_PRIVATE)
+            .getStringSet(KEY_MODULE_KEYS, emptySet()) ?: emptySet()
+        if (keys.isNotEmpty()) {
+            devicesList.clear()
+            keys.sorted().forEach { devicesList.add(Device(it)) }
+            devicesAdapter.notifyDataSetChanged()
+            updateRecyclerViewVisibility()
+        }
+    }
+
+    private fun saveCachedDevices(keys: List<String>) {
+        getSharedPreferences(PREFS_DEVICES, MODE_PRIVATE)
+            .edit().putStringSet(KEY_MODULE_KEYS, keys.toSet()).apply()
     }
 }

@@ -12,7 +12,7 @@ import androidx.fragment.app.activityViewModels
 import com.devapps.aquatraking.databinding.FragmentHomeBinding
 import com.devapps.aquatraking.services.ForegroundService
 import com.devapps.aquatraking.services.ViewModel
-import com.devapps.aquatraking.views.CustomWaveView
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -34,8 +34,6 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private var waveView2: CustomWaveView? = null
-
     private var currentDate: Calendar = Calendar.getInstance()
     private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
@@ -44,6 +42,8 @@ class HomeFragment : Fragment() {
 
     private val maxDaysBack = 5
     private var currentOffset = 0
+    private var capacidadLitros: Double = 0.0
+    private var ultimoPorcentaje: Float? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,7 +69,6 @@ class HomeFragment : Fragment() {
         }
         val serviceIntent = Intent(requireContext(), ForegroundService::class.java)
         requireContext().startService(serviceIntent)
-        waveView2 = binding.waveView
         binding.tvDate.text = dateFormat.format(currentDate.time)
         actualizarFechaDisplay()
         binding.btnPrevious.setOnClickListener {
@@ -91,6 +90,14 @@ class HomeFragment : Fragment() {
 
     private fun loadTankData(key: String) {
         consumoListener?.let { consumoRef?.removeEventListener(it) }
+
+        FirebaseFirestore.getInstance().collection("modules").document(key)
+            .get()
+            .addOnSuccessListener { doc ->
+                capacidadLitros = doc.getDouble("capacidadLitros") ?: 0.0
+                // Si RTDB ya entregó el porcentaje antes que Firestore, recalcular tvVolume ahora
+                ultimoPorcentaje?.let { actualizarVolumen(it) }
+            }
 
         val ref = FirebaseDatabase.getInstance().getReference("ModulesWifi/$key")
         val listener = object : ChildEventListener {
@@ -118,14 +125,24 @@ class HomeFragment : Fragment() {
     }
 
     private fun actualizarDatos(snapshot: DataSnapshot) {
-        val fecha = snapshot.child("fecha").value?.toString() ?: "Sin fecha"
-        val porcentaje = snapshot.child("porcentaje").value?.toString() ?: "0"
-        Log.d("HomeFragment", "Fecha: $fecha, Porcentaje: $porcentaje")
-        updateWaveView(snapshot)
+        val fecha = snapshot.child("fecha").value?.toString() ?: return
+        val targetDate = Calendar.getInstance().apply { add(Calendar.DATE, -currentOffset) }
+        val fechaFormateada = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(targetDate.time)
+        if (fecha == fechaFormateada) {
+            updateWaveView(snapshot)
+        }
     }
 
     private fun showDefaultData() {
-        waveView2?.setProgress(0f)
+        ultimoPorcentaje = null
+        _binding?.waveView?.setProgress(0f)
+        _binding?.tvPercentage?.text = "0%"
+        _binding?.tvVolume?.text = "-- L"
+    }
+
+    private fun actualizarVolumen(porcentaje: Float) {
+        val litros = if (capacidadLitros > 0) (porcentaje / 100f) * capacidadLitros else null
+        _binding?.tvVolume?.text = if (litros != null) String.format("%.2f L", litros) else "-- L"
     }
 
     private fun actualizarFechaDisplay() {
@@ -175,14 +192,14 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateWaveView(snapshot: DataSnapshot) {
-        val porcentajeStr = snapshot.child("porcentaje").value?.toString()
-        val porcentaje = porcentajeStr?.toFloatOrNull()
-
+        val porcentaje = snapshot.child("porcentaje").value?.toString()?.toFloatOrNull()
         val fecha = snapshot.child("fecha").value?.toString()
         if (porcentaje != null && fecha != null) {
-            waveView2?.setProgress(porcentaje)
-            binding.tvPercentage.text = "${porcentaje.toInt()}%"
-            Log.d("HomeFragment", "Porcentaje actualizado: $porcentaje% para la fecha: ${snapshot.child("fecha").value}")
+            ultimoPorcentaje = porcentaje
+            _binding?.waveView?.setProgress(porcentaje)
+            _binding?.tvPercentage?.text = "${porcentaje.toInt()}%"
+            actualizarVolumen(porcentaje)
+            Log.d("HomeFragment", "Porcentaje actualizado: $porcentaje% fecha: $fecha")
             sendPercentageToService(porcentaje, fecha)
         } else {
             Log.e("HomeFragment", "El porcentaje es nulo o no válido")
@@ -197,6 +214,17 @@ class HomeFragment : Fragment() {
             }
             requireContext().startService(serviceIntent)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val key = tankViewModel.selectedKey.value ?: return
+        FirebaseFirestore.getInstance().collection("modules").document(key)
+            .get()
+            .addOnSuccessListener { doc ->
+                capacidadLitros = doc.getDouble("capacidadLitros") ?: 0.0
+                ultimoPorcentaje?.let { actualizarVolumen(it) }
+            }
     }
 
     override fun onDestroyView() {

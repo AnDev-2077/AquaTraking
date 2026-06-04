@@ -1,101 +1,94 @@
 package com.devapps.aquatraking.activities
 
 import android.os.Bundle
-
 import androidx.appcompat.app.AppCompatActivity
 import com.devapps.aquatraking.databinding.ActivityNotificationsMenuBinding
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 
 class NotificationsMenuActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityNotificationsMenuBinding
+
+    private val lowItems      = arrayOf("30%", "25%", "20%")
+    private val criticalItems = arrayOf("20%", "15%", "10%")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityNotificationsMenuBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val singleItems = arrayOf("30%", "25%", "20%")
-        val checkedItem = 1
-
-        val _singleItems = arrayOf("20%", "15%", "10%")
-        val _checkedItem = 1
-
         val toolbar: MaterialToolbar = binding.toolbar
         toolbar.setNavigationOnClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
 
-        val sharedPreferences = getSharedPreferences("NotificationPrefs", MODE_PRIVATE)
-        val isNotificationsEnabled = sharedPreferences.getBoolean("notifications_enabled", true)
-        binding.switchGeneralNotifications.isChecked = isNotificationsEnabled
+        val prefs = getSharedPreferences("NotificationPrefs", MODE_PRIVATE)
 
-        // Actualiza los TextView con los valores guardados al iniciar la app
-        val savedThreshold = sharedPreferences.getFloat("notification_threshold", 25f)
-        binding.tvLowLevel.text = "${savedThreshold.toInt()}%"
-
-        val savedCriticalThreshold = sharedPreferences.getFloat("notification_critical_threshold", 10f)
-        binding.tvCriticLevel.text = "${savedCriticalThreshold.toInt()}%"
-
-        // Guarda el estado del switch cuando cambia
+        binding.switchGeneralNotifications.isChecked = prefs.getBoolean("notifications_enabled", true)
         binding.switchGeneralNotifications.setOnCheckedChangeListener { _, isChecked ->
-            sharedPreferences.edit().putBoolean("notifications_enabled", isChecked).apply()
+            prefs.edit().putBoolean("notifications_enabled", isChecked).apply()
         }
 
+        binding.tvLowLevel.text    = "${prefs.getFloat("notification_threshold", 25f).toInt()}%"
+        binding.tvCriticLevel.text = "${prefs.getFloat("notification_critical_threshold", 10f).toInt()}%"
+
         binding.llOption1.setOnClickListener {
-            val prefs = getSharedPreferences("NotificationPrefs", MODE_PRIVATE)
-            val savedThreshold = prefs.getFloat("notification_threshold", 25f)
-            val savedThresholdString = "${savedThreshold.toInt()}%"
-            var initialIndex = singleItems.indexOf(savedThresholdString)
-            if (initialIndex == -1) {
-                initialIndex = checkedItem
-            }
-            var selectedThresholdIndex = initialIndex
+            val currentLow      = prefs.getFloat("notification_threshold", 25f)
+            val currentCritical = prefs.getFloat("notification_critical_threshold", 10f)
+            val currentStr      = "${currentLow.toInt()}%"
+            var selectedIndex   = lowItems.indexOf(currentStr).takeIf { it != -1 } ?: 1
 
             MaterialAlertDialogBuilder(this)
-                .setTitle("Porcentajes de notificación")
-                .setSingleChoiceItems(singleItems, initialIndex) { _, which ->
-                    selectedThresholdIndex = which
+                .setTitle("Umbral de nivel bajo")
+                .setSingleChoiceItems(lowItems, selectedIndex) { _, which ->
+                    selectedIndex = which
                 }
                 .setPositiveButton("Aceptar") { dialog, _ ->
-                    val selectedThresholdString = singleItems[selectedThresholdIndex]
-                    val selectedThreshold = selectedThresholdString.replace("%", "").toFloat()
-                    prefs.edit().putFloat("notification_threshold", selectedThreshold).apply()
-                    binding.tvLowLevel.text = selectedThresholdString
+                    val selected = lowItems[selectedIndex].replace("%", "").toFloat()
+                    if (selected <= currentCritical) {
+                        Snackbar.make(
+                            binding.root,
+                            "El umbral bajo debe ser mayor que el umbral crítico (${currentCritical.toInt()}%)",
+                            Snackbar.LENGTH_LONG
+                        ).show()
+                    } else {
+                        prefs.edit().putFloat("notification_threshold", selected).apply()
+                        binding.tvLowLevel.text = lowItems[selectedIndex]
+                    }
                     dialog.dismiss()
                 }
-                .setNegativeButton("Cancelar") { dialog, _ ->
-                    dialog.dismiss()
-                }
+                .setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
                 .show()
         }
 
         binding.llOption2.setOnClickListener {
-            val prefs = getSharedPreferences("NotificationPrefs", MODE_PRIVATE)
-            val savedCriticalThreshold = prefs.getFloat("notification_critical_threshold", 10f)
-            val savedCriticalThresholdString = "${savedCriticalThreshold.toInt()}%"
-            var initialCriticalIndex = _singleItems.indexOf(savedCriticalThresholdString)
-            if (initialCriticalIndex == -1) {
-                initialCriticalIndex = _checkedItem
-            }
-            var selectedCriticalIndex = initialCriticalIndex
+            val currentLow      = prefs.getFloat("notification_threshold", 25f)
+            val currentCritical = prefs.getFloat("notification_critical_threshold", 10f)
+            val currentStr      = "${currentCritical.toInt()}%"
+            var selectedIndex   = criticalItems.indexOf(currentStr).takeIf { it != -1 } ?: 1
 
             MaterialAlertDialogBuilder(this)
-                .setTitle("Porcentajes de notificación")
-                .setSingleChoiceItems(_singleItems, initialCriticalIndex) { _, which ->
-                    selectedCriticalIndex = which
+                .setTitle("Umbral de nivel crítico")
+                .setSingleChoiceItems(criticalItems, selectedIndex) { _, which ->
+                    selectedIndex = which
                 }
                 .setPositiveButton("Aceptar") { dialog, _ ->
-                    val selectedCriticalThresholdString = _singleItems[selectedCriticalIndex]
-                    val selectedCriticalThreshold = selectedCriticalThresholdString.replace("%", "").toFloat()
-                    prefs.edit().putFloat("notification_critical_threshold", selectedCriticalThreshold).apply()
-                    binding.tvCriticLevel.text = selectedCriticalThresholdString
+                    val selected = criticalItems[selectedIndex].replace("%", "").toFloat()
+                    if (selected >= currentLow) {
+                        Snackbar.make(
+                            binding.root,
+                            "El umbral crítico debe ser menor que el umbral bajo (${currentLow.toInt()}%)",
+                            Snackbar.LENGTH_LONG
+                        ).show()
+                    } else {
+                        prefs.edit().putFloat("notification_critical_threshold", selected).apply()
+                        binding.tvCriticLevel.text = criticalItems[selectedIndex]
+                    }
                     dialog.dismiss()
                 }
-                .setNegativeButton("Cancelar") { dialog, _ ->
-                    dialog.dismiss()
-                }
+                .setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
                 .show()
         }
     }

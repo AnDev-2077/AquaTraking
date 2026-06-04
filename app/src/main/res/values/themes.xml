@@ -5,11 +5,38 @@
         <item name="colorPrimaryVariant">@color/blue2</item>
         <item name="colorOnPrimary">@color/blueText</item>
 
-        <item name="android:colorBackground">@color/blue3</item>
+        <item name="colorPrimaryContainer">@color/blue3</item>
+        <item name="colorOnPrimaryContainer">@color/text_dark</item>
 
+        <item name="colorSecondary">@color/blue</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondaryContainer">@color/blue3</item>
+        <item name="colorOnSecondaryContainer">@color/text_dark</item>
+
+        <item name="colorTertiary">@color/blue</item>
+        <item name="colorOnTertiary">@color/white</item>
+        <item name="colorTertiaryContainer">@color/blue3</item>
+        <item name="colorOnTertiaryContainer">@color/text_dark</item>
+
+        <item name="android:colorBackground">@color/blue3</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/text_dark</item>
+        <item name="colorSurfaceVariant">#F5F5F5</item>
+        <item name="colorOnSurfaceVariant">@color/gray2</item>
+        <item name="colorOutline">@color/gray3</item>
         <item name="android:textColorPrimary">@color/text_dark</item>
         <item name="bottomNavigationStyle">@style/Widget.AquaTraking.BottomNavigationView</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.App.AlertDialog</item>
 
+    </style>
+    <style name="ThemeOverlay.App.AlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/text_dark</item>
+        <item name="colorOnSurfaceVariant">@color/gray2</item>
+        <item name="colorPrimary">@color/blue2</item>
+        <item name="colorOnPrimary">@color/blueText</item>
+        <item name="colorSecondary">@color/blue</item>
+        <item name="colorOutline">@color/gray3</item>
     </style>
     <style name="Theme.AquaTraking" parent="Base.Theme.AquaTraking" />
     <style name="Widget.AquaTraking.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">

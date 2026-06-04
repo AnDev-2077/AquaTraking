@@ -107,7 +107,7 @@
                     android:textColor="@color/chart_text_primary"
                     android:textSize="26sp"
                     android:textStyle="bold"
-                    android:text="100%" />
+                    android:text="--%" />
             </LinearLayout>
 
             <LinearLayout
@@ -130,7 +130,7 @@
                     android:textColor="@color/chart_text_primary"
                     android:textSize="26sp"
                     android:textStyle="bold"
-                    android:text="1600 L" />
+                    android:text="-- L" />
             </LinearLayout>
         </LinearLayout>
 

@@ -11,10 +11,6 @@ import com.devapps.aquatraking.databinding.ActivityTeamsBinding
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 
 class GroupsActivity : AppCompatActivity() {
@@ -132,7 +128,6 @@ class GroupsActivity : AppCompatActivity() {
     }
 
     private fun verifyKey() {
-
         val key = binding.editTextVerifyKey.text.toString().trim()
 
         if (key.isEmpty()) {
@@ -146,47 +141,23 @@ class GroupsActivity : AppCompatActivity() {
             return
         }
 
-        val databaseReference = FirebaseDatabase.getInstance().getReference("/ModulesWifi/")
-        databaseReference.child(key).addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    Log.d("TeamsActivity", "Key exists in database")
-                    deviceId = snapshot.key
+        FirebaseFirestore.getInstance().collection("modules").document(key)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    Log.d("TeamsActivity", "Key exists in Firestore")
+                    deviceId = key
                     Toast.makeText(this@GroupsActivity, "Key verificada. Tanque encontrado.", Toast.LENGTH_SHORT).show()
                 } else {
-                    Log.d("TeamsActivity", "Key does not exist in database")
+                    Log.d("TeamsActivity", "Key does not exist in Firestore")
                     deviceId = null
                     Toast.makeText(this@GroupsActivity, "Key no válida. No se encontró ningún dispositivo.", Toast.LENGTH_SHORT).show()
                 }
             }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("TeamsActivity", "Error: ${error.message}")
-                Toast.makeText(this@GroupsActivity, "Error al verificar la key: ${error.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
-
-        /*val key = binding.editTextVerifyKey.text.toString().trim()
-        if (key.isEmpty()) {
-            Toast.makeText(this, "Ingresa una key válida", Toast.LENGTH_SHORT).show()
-            return
-        }
-        FirebaseFirestore.getInstance().collection("tanks")
-            .whereEqualTo("key", key)
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                if (querySnapshot.isEmpty) {
-                    Toast.makeText(this, "Key no válida. No se encontró ningún tanque.", Toast.LENGTH_SHORT).show()
-                    deviceId = null
-                } else {
-                    // Se toma el primer tanque encontrado
-                    deviceId = querySnapshot.documents[0].id
-                    Toast.makeText(this, "Key verificada. Tanque encontrado.", Toast.LENGTH_SHORT).show()
-                }
-            }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Error al verificar la key: ${e.message}", Toast.LENGTH_SHORT).show()
-            }*/
+                Log.e("TeamsActivity", "Error: ${e.message}")
+                Toast.makeText(this@GroupsActivity, "Error al verificar la key: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun createGroup() {
